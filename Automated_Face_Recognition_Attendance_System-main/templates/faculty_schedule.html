@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>Class schedule</h1><p>{{ assignment[0] }} · Year {{ assignment[1] }} · Section {{ assignment[2] }}</p></div><form method="get" class="class-picker"><label for="scheduleClass">Faculty class</label><select id="scheduleClass" name="class_id">{% for option in class_options %}<option value="{{ option[0] }}" {% if selected_class_id == option[0] %}selected{% endif %}>{{ option[1] }} · Year {{ option[2] }} · Section {{ option[3] }}</option>{% endfor %}</select><button class="btn" type="submit">Load class</button></form></header>
+    <section class="portal-panel"><div class="table-scroll"><table class="portal-table"><thead><tr><th>Day</th><th>Period</th><th>Time</th><th>Subject</th><th>Room</th></tr></thead>
+    <tbody>{% for item in schedules %}{% set timing = periods[item[2]] %}<tr><td>{{ weekdays[item[1]] }}</td><td>P{{ item[2] }}</td><td>{{ '%02d'|format(timing[0]) }}:{{ '%02d'|format(timing[1]) }}–{{ '%02d'|format(timing[2]) }}:{{ '%02d'|format(timing[3]) }}</td><td>{{ item[0] }}</td><td>{{ item[3] }}</td></tr>
+    {% else %}<tr><td colspan="5">No schedule has been published for this class yet.</td></tr>{% endfor %}</tbody></table></div></section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel{max-width:1100px;margin:0 auto 1rem}.portal-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid #cbd8dc;padding-bottom:.8rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p{margin:.35rem 0 0;color:#62747b}.class-picker{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.class-picker select{padding:.55rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1rem}.table-scroll{overflow-x:auto}.portal-table{width:100%;border-collapse:collapse}.portal-table th,.portal-table td{padding:.7rem;text-align:left;border-bottom:1px solid #e1e8ea}.portal-table th{background:#f2f6f7;color:#34474f}@media(max-width:650px){.portal-heading{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}

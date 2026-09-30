@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .profile-bg {
+        background: linear-gradient(rgba(0, 0, 0, 0.50), rgba(0, 0, 0, 0.50)),
+            url('/static/bec_1.jpg') center/cover fixed;
+        min-height: 100vh;
+        padding: 2rem;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        transition: background-image 1.5s ease;
+    }
+
+    .profile-card {
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 560px;
+        width: 100%;
+        box-shadow: 0 12px 40px rgba(2, 6, 23, 0.15);
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 0.75rem;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    .profile-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .profile-header .reg-badge {
+        display: inline-block;
+        margin-top: 0.35rem;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.2rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1px solid #e2e8f0;
+    }
+
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #334155;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.65rem 0.9rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+
+    .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 1.25rem 0;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 0.75rem;
+        text-align: center;
+        width: 100%;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: underline;
+    }
+
+    .success-toast {
+        background: #dcfce7;
+        color: #166534;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        border: 1px solid #bbf7d0;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="profile-bg">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">🎓</div>
+            <h2>{{ user[1] or user[0] }}</h2>
+            <span class="reg-badge">{{ user[0] }}</span>
+        </div>
+
+        {% if saved %}
+        <div class="success-toast">✅ Profile updated successfully!</div>
+        {% endif %}
+
+        <form method="POST" action="/student/profile">
+            <div class="field-row">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ user[1] or '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" value="{{ user[2] or '' }}" required>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <select name="year" class="form-control">
+                        <option value="">--</option>
+                        <option value="1" {% if user[3]=='1' %}selected{% endif %}>1st Year</option>
+                        <option value="2" {% if user[3]=='2' %}selected{% endif %}>2nd Year</option>
+                        <option value="3" {% if user[3]=='3' %}selected{% endif %}>3rd Year</option>
+                        <option value="4" {% if user[3]=='4' %}selected{% endif %}>4th Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Section</label>
+                    <select name="section" class="form-control">
+                        <option value="">--</option>
+                        <option value="A" {% if user[4]=='A' %}selected{% endif %}>A</option>
+                        <option value="B" {% if user[4]=='B' %}selected{% endif %}>B</option>
+                        <option value="C" {% if user[4]=='C' %}selected{% endif %}>C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Branch</label>
+                <select name="branch" class="form-control">
+                    <option value="">--</option>
+                    <option value="CIVIL" {% if user[5]=='CIVIL' %}selected{% endif %}>CIVIL</option>
+                    <option value="CYBER" {% if user[5]=='CYBER' %}selected{% endif %}>CYBER</option>
+                    <option value="CSE" {% if user[5]=='CSE' %}selected{% endif %}>CSE</option>
+                    <option value="CSM" {% if user[5]=='CSM' %}selected{% endif %}>CSM</option>
+                    <option value="DS" {% if user[5]=='DS' %}selected{% endif %}>DS</option>
+                    <option value="ECE" {% if user[5]=='ECE' %}selected{% endif %}>ECE</option>
+                    <option value="EEE" {% if user[5]=='EEE' %}selected{% endif %}>EEE</option>
+                    <option value="EIE" {% if user[5]=='EIE' %}selected{% endif %}>EIE</option>
+                    <option value="IT" {% if user[5]=='IT' %}selected{% endif %}>IT</option>
+                    <option value="MECH" {% if user[5]=='MECH' %}selected{% endif %}>MECH</option>
+                </select>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="form-group">
+                <label class="form-label">🔒 Change Password <span style="color:#94a3b8; font-weight:400;">(leave blank
+                        to keep current)</span></label>
+                <input type="password" name="new_password" class="form-control" placeholder="New password">
+            </div>
+
+            <button type="submit" class="btn-save">Save Changes</button>
+            <a href="/student" class="btn-back">← Back to Dashboard</a>
+        </form>
+    </div>
+</div>
+
+<div id="profileBgEl" style="display:none"></div>
+<script>
+    // Rotate BEC photos on profile page background
+    const BEC_PHOTOS = ['/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'];
+    let bgIdx = 0, validPhotos = [];
+    Promise.all(BEC_PHOTOS.map(src => new Promise(res => { const i = new Image(); i.onload = () => res(src); i.onerror = () => res(null); i.src = src; }))).then(r => {
+        validPhotos = r.filter(Boolean);
+        const bg = document.querySelector('.profile-bg');
+        if (!bg || !validPhotos.length) return;
+        bg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.50),rgba(0,0,0,0.50)),url('${validPhotos[0]}')`;
+        setInterval(() => { bgIdx = (bgIdx + 1) % validPhotos.length; bg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.50),rgba(0,0,0,0.50)),url('${validPhotos[bgIdx]}')`; }, 8000);
+    });
+</script>
+{% endblock %}

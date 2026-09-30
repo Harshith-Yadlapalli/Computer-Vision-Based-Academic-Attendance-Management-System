@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>Class student details</h1><p>{{ branch }} · Year {{ year }} · Section {{ section }} · {{ students|length }} students</p></div><a class="btn" href="/faculty?class_id={{ selected_class_id }}">Attendance entry</a></header>
+    <section class="portal-panel" aria-label="Student list and attendance percentages">
+        <form method="get" class="class-picker"><label for="studentClass">Faculty class</label><select id="studentClass" name="class_id">{% for option in class_options %}<option value="{{ option[0] }}" {% if selected_class_id == option[0] %}selected{% endif %}>{{ option[1] }} · Year {{ option[2] }} · Section {{ option[3] }}</option>{% endfor %}</select><button class="btn" type="submit">Load class</button><a class="btn" href="/faculty/export-excel?class_id={{ selected_class_id }}">Download Excel report</a></form>
+        <div class="table-scroll"><table class="portal-table"><thead><tr><th>Student ID</th><th>Name</th><th>Branch</th><th>Year</th><th>Section</th><th>Overall attendance</th><th>Present</th><th>Periods</th></tr></thead>
+        <tbody>{% for student in students %}<tr><td>{{ student[0] }}</td><td>{{ student[1] or '—' }}</td><td>{{ student[2] or branch }}</td><td>{{ student[3] or year }}</td><td>{{ student[4] or section }}</td><td><strong>{{ student[5] }}%</strong></td><td>{{ student[6] }}</td><td>{{ student[7] }}</td></tr>
+        {% else %}<tr><td colspan="8">No students are assigned to this class yet.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel{max-width:1100px;margin:0 auto 1rem}.portal-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid #cbd8dc;padding-bottom:.8rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p{margin:.35rem 0 0;color:#62747b}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1rem}.class-picker{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}.class-picker select{padding:.55rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit}.table-scroll{overflow-x:auto}.portal-table{width:100%;border-collapse:collapse}.portal-table th,.portal-table td{padding:.7rem;text-align:left;border-bottom:1px solid #e1e8ea;white-space:nowrap}.portal-table th{background:#f2f6f7;color:#34474f}@media(max-width:600px){.portal-heading{align-items:flex-start;flex-direction:column}}
+</style>
+{% endblock %}

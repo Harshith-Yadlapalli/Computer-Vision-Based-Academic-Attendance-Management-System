@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manual Attendance | HOD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-indigo: #1E3A8A;
+            --brand-teal: #0EA5E9;
+            --surface: #FFFFFF;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            line-height: 1.6;
+            letter-spacing: .2px;
+            background: #0f172a;
+        }
+
+        .bg-slider {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('/static/bec_1.jpg') center/cover no-repeat;
+            filter: brightness(0.22);
+            transition: background-image 1.5s ease;
+        }
+
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            z-index: 1000;
+        }
+
+        .fixed-header .inner {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: .75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .fixed-header .title {
+            font-weight: 800;
+            color: #0F172A;
+            font-size: 1.25rem;
+        }
+
+        .fixed-header .college {
+            font-weight: 800;
+            color: #1E3A8A;
+            font-size: 1rem;
+        }
+
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border-top: 1px solid #E2E8F0;
+            text-align: center;
+            color: #6B7280;
+            font-size: .85rem;
+            padding: .5rem 0;
+        }
+
+        .content {
+            max-width: 720px;
+            margin: 7rem auto 4rem;
+            background: #FFFFFFEE;
+            backdrop-filter: blur(4px);
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 10px 24px rgba(2, 6, 23, .12);
+            padding: 1.25rem;
+        }
+
+        .panel-header {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin: 0 0 1rem 0;
+            color: #0F172A;
+            letter-spacing: .3px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .btn-primary {
+            background: var(--brand-indigo);
+        }
+
+        .btn-primary:hover {
+            background: #0b2f74;
+        }
+
+        .btn {
+            font-weight: 700;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: .75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        /* Period & Status selectors */
+        .inline-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .inline-group>div {
+            flex: 1;
+        }
+
+        /* Status radio pills */
+        .status-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-pill {
+            flex: 1;
+            text-align: center;
+            padding: 0.6rem 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .status-pill:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-pill input {
+            display: none;
+        }
+
+        .status-pill.sp-present {
+            color: #166534;
+        }
+
+        .status-pill.sp-late {
+            color: #92400e;
+        }
+
+        .status-pill.sp-od {
+            color: #1e40af;
+        }
+
+        .status-pill input:checked+span {
+            font-size: 1rem;
+        }
+
+        .status-pill:has(input:checked).sp-present {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .status-pill:has(input:checked).sp-late {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .status-pill:has(input:checked).sp-od {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        /* Info box */
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #1e40af;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-slider" id="bgSlider"></div>
+    <div class="fixed-header">
+        <div class="inner">
+            <img src="/static/beclogo.png" alt="BEC"
+                style="width:38px;height:38px;border-radius:50%;object-fit:contain;"
+                onerror="this.style.display='none'">
+            <div>
+                <div class="college">Attendance System</div>
+                <div class="title">📋 Manual / OD Attendance — Automated Face Recognition Attendance System</div>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="panel-header">✍️ Add Manual / OD Attendance</div>
+
+        <div class="info-box">
+            ℹ️ <b>Period-Wise System:</b> Select a specific period (P1-P6) or "All Periods" to mark attendance.
+            Choose <b>Present</b> (1.0) or <b>OD</b> (On Duty = 1.0) as the status.
+        </div>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">🎓 Register Number</label>
+                <input type="text" name="reg_no" class="form-control" value="{{ preset_id or '' }}" required>
+            </div>
+            <div class="inline-group">
+                <div class="form-group">
+                    <label class="form-label">📅 Date</label>
+                    <input type="date" name="date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">⏰ Time</label>
+                    <input type="time" name="time" class="form-control" required>
+                </div>
+            </div>
+            <div class="inline-group">
+                <div class="form-group">
+                    <label class="form-label">🕐 Period</label>
+                    <select name="period" class="form-control">
+                        <option value="all">📋 All Periods (Full Day)</option>
+                        {% if period_schedule %}
+                        {% for pnum, timing in period_schedule.items() %}
+                        <option value="{{ pnum }}">P{{ pnum }} — {{ timing[0] }}:{{ '%02d'|format(timing[1]) }}–{{
+                            timing[2] }}:{{ '%02d'|format(timing[3]) }}</option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📋 Year</label>
+                    <select name="year" class="form-control">
+                        <option value="">-- Optional --</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">📌 Attendance Status</label>
+                <div class="status-pills">
+                    <label class="status-pill sp-present">
+                        <input type="radio" name="status" value="present" checked>
+                        <span>✅ Present</span>
+                    </label>
+                    <label class="status-pill sp-od">
+                        <input type="radio" name="status" value="od">
+                        <span>🏷️ OD (On Duty)</span>
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">💾 Save Attendance</button>
+            <a href="/hod" class="btn" style="margin-left:.5rem;">⬅️ Back</a>
+        </form>
+    </div>
+    <div class="fixed-footer">
+        <strong>Automated Face Recognition Attendance System</strong> &nbsp;|&nbsp;
+        &copy; 2026 BEC — NETHRA • AKHIL • NAGA SAI • LAKSHMAN
+    </div>
+    <script>
+        // Rotating BEC Background
+        const BEC_PHOTOS = [
+            '/static/bec_1.jpg','/static/bec_2.jpg','/static/bec_3.jpg','/static/bec_4.jpg','/static/bec_5.jpg','/static/bec_6.jpg','/static/bec_7.jpg','/static/bec_8.jpg','/static/bec_9.jpg','/static/bec_10.jpg'
+        ];
+        let bgIdx = 0, validPhotos = [];
+        Promise.all(BEC_PHOTOS.map(src => new Promise(res => { const i = new Image(); i.onload = () => res(src); i.onerror = () => res(null); i.src = src; }))).then(r => {
+            validPhotos = r.filter(Boolean);
+            const sl = document.getElementById('bgSlider');
+            if (!sl || !validPhotos.length) return;
+            sl.style.backgroundImage = `url('${validPhotos[0]}')`;
+            setInterval(() => { bgIdx = (bgIdx + 1) % validPhotos.length; sl.style.backgroundImage = `url('${validPhotos[bgIdx]}')`; }, 8000);
+        });
+    </script>
+</body>
+
+</html>

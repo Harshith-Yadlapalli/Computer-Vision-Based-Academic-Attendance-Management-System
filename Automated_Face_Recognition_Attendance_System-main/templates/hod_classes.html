@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>Class schedules</h1><p>Assign a subject, classroom, weekday, and period to an approved faculty class.</p></div></header>
+    <section class="portal-panel">
+        {% if saved == 'assigned' %}<p class="notice success">Faculty class assignment saved.</p>{% elif saved %}<p class="notice success">Class schedule saved.</p>{% endif %}
+        {% if error %}<p class="notice error">Check the selected faculty, class, period, room, and subject.</p>{% endif %}
+        <h2>Assign a faculty member to a class</h2>
+        <form method="post" class="assignment-form">
+            <input type="hidden" name="action" value="assign-class">
+            <label>Approved faculty<select name="faculty_id" required><option value="">Select faculty</option>{% for faculty in faculty_members %}<option value="{{ faculty[0] }}">{{ faculty[1] or faculty[0] }} · {{ faculty[2] }}</option>{% endfor %}</select></label>
+            <label>Branch<select name="branch" required><option value="">Select branch</option>{% for branch, prefix, label in branches %}<option value="{{ branch }}">{{ branch }}</option>{% endfor %}</select></label>
+            <label>Year<select name="year" required><option value="">Select year</option>{% for year in ['1', '2', '3', '4'] %}<option value="{{ year }}">Year {{ year }}</option>{% endfor %}</select></label>
+            <label>Section<select name="section" required><option value="">Select section</option>{% for section in ['A', 'B', 'C', 'D'] %}<option value="{{ section }}">Section {{ section }}</option>{% endfor %}</select></label>
+            <button class="btn btn-primary" type="submit">Assign class</button>
+        </form>
+    </section>
+    <section class="portal-panel"><h2>Faculty class assignments</h2><div class="table-scroll"><table class="portal-table"><thead><tr><th>Faculty</th><th>Class</th><th></th></tr></thead><tbody>
+        {% for assignment in class_assignments %}<tr><td>{{ assignment[2] or assignment[1] }}</td><td>{{ assignment[3] }} · Year {{ assignment[4] }} · Section {{ assignment[5] }}</td><td><form method="post"><input type="hidden" name="action" value="remove-class"><input type="hidden" name="class_id" value="{{ assignment[0] }}"><button class="delete-btn" type="submit" aria-label="Remove faculty class assignment">Remove</button></form></td></tr>
+        {% else %}<tr><td colspan="3">No faculty class assignments.</td></tr>{% endfor %}
+    </tbody></table></div></section>
+    <section class="portal-panel">
+        <h2>Schedule a class</h2>
+        <form method="post" class="schedule-form">
+            <label>Faculty class<select name="class_assignment_id" required><option value="">Select faculty class</option>{% for assignment in class_assignments %}<option value="{{ assignment[0] }}">{{ assignment[2] or assignment[1] }} · {{ assignment[3] }} · Year {{ assignment[4] }} · Section {{ assignment[5] }}</option>{% endfor %}</select></label>
+            <label>Subject<input name="subject" maxlength="100" required></label>
+            <label>Room<input name="room" maxlength="50" required placeholder="e.g. C-204"></label>
+            <label>Weekday<select name="weekday" required>{% for number, day in weekdays.items() %}<option value="{{ number }}">{{ day }}</option>{% endfor %}</select></label>
+            <label>Period<select name="period" required>{% for number, timing in periods.items() %}<option value="{{ number }}">P{{ number }} · {{ '%02d'|format(timing[0]) }}:{{ '%02d'|format(timing[1]) }}–{{ '%02d'|format(timing[2]) }}:{{ '%02d'|format(timing[3]) }}</option>{% endfor %}</select></label>
+            <button class="btn btn-primary" type="submit">Add schedule</button>
+        </form>
+    </section>
+    <section class="portal-panel"><h2>Published periods</h2><div class="table-scroll"><table class="portal-table"><thead><tr><th>Class</th><th>Subject</th><th>Day</th><th>Period</th><th>Room</th><th>Faculty</th><th></th></tr></thead><tbody>
+        {% for item in schedules %}{% set timing = periods[item[6]] %}<tr><td>{{ item[1] }} · Year {{ item[2] }} · Section {{ item[3] }}</td><td>{{ item[4] }}</td><td>{{ weekdays[item[5]] }}</td><td>P{{ item[6] }} · {{ '%02d'|format(timing[0]) }}:{{ '%02d'|format(timing[1]) }}–{{ '%02d'|format(timing[2]) }}:{{ '%02d'|format(timing[3]) }}</td><td>{{ item[7] }}</td><td>{{ item[8] or '—' }}</td><td><form method="post"><input type="hidden" name="action" value="delete"><input type="hidden" name="schedule_id" value="{{ item[0] }}"><button class="delete-btn" type="submit" aria-label="Remove schedule">Remove</button></form></td></tr>
+        {% else %}<tr><td colspan="7">No class schedules have been added.</td></tr>{% endfor %}
+    </tbody></table></div></section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel{max-width:1200px;margin:0 auto 1rem}.portal-heading{border-bottom:1px solid #cbd8dc;padding-bottom:.8rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p{margin:.35rem 0 0;color:#62747b}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1rem}.portal-panel h2{font-size:1.1rem;margin:.2rem 0 .8rem}.schedule-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;align-items:end}.schedule-form label{display:grid;gap:.35rem;font-weight:600}.schedule-form input,.schedule-form select{min-width:0;padding:.6rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit;background:white}.schedule-form button{min-height:40px}.table-scroll{overflow-x:auto}.portal-table{width:100%;border-collapse:collapse}.portal-table th,.portal-table td{padding:.65rem;text-align:left;border-bottom:1px solid #e1e8ea;white-space:nowrap}.portal-table th{background:#f2f6f7;color:#34474f}.notice{padding:.7rem;border-radius:5px}.success{background:#dcfce7;color:#166534}.error{background:#fee2e2;color:#991b1b}.delete-btn{border:0;background:#fee2e2;color:#991b1b;border-radius:4px;padding:.4rem .6rem;cursor:pointer}@media(max-width:760px){.schedule-form{grid-template-columns:1fr 1fr}}@media(max-width:500px){.schedule-form{grid-template-columns:1fr}}
+</style>
+<style>
+.assignment-form{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;align-items:end}.assignment-form label{display:grid;gap:.35rem;font-weight:600}.assignment-form input,.assignment-form select{min-width:0;padding:.6rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit;background:#fff}.assignment-form button{min-height:40px}@media(max-width:850px){.assignment-form{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){.assignment-form{grid-template-columns:1fr}}
+</style>
+{% endblock %}

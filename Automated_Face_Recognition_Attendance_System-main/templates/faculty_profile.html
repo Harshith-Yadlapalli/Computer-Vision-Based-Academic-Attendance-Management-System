@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>Faculty profile</h1><p>{{ faculty[2] }} · Year {{ faculty[3] }} · Section {{ faculty[4] }}</p></div></header>
+    <section class="portal-panel">
+        {% if saved %}<p class="notice success">Profile saved.</p>{% endif %}
+        {% if error %}<p class="notice error">{{ error }}</p>{% endif %}
+        <form method="post" class="portal-form">
+            <label>Faculty ID<input value="{{ faculty[0] }}" disabled></label>
+            <label>Full name<input name="name" value="{{ faculty[1] or '' }}" required maxlength="100"></label>
+            <label>Email<input type="email" name="email" value="{{ faculty[5] or '' }}" maxlength="254"></label>
+            <label>Phone<input type="tel" name="phone" value="{{ faculty[6] or '' }}" maxlength="30"></label>
+            <h2>Change password</h2>
+            <label>Current password<input type="password" name="current_password" autocomplete="current-password"></label>
+            <label>New password <span class="muted">Leave blank to keep the current password.</span><input type="password" name="new_password" autocomplete="new-password" minlength="8"></label>
+            <button class="btn btn-primary" type="submit">Save profile</button>
+        </form>
+    </section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel{max-width:1000px;margin:0 auto 1rem}.portal-heading{border-bottom:1px solid #cbd8dc;padding-bottom:.8rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p,.muted{color:#62747b}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1.25rem}.portal-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.portal-form label{display:grid;gap:.35rem;font-weight:600}.portal-form input{font:inherit;padding:.65rem;border:1px solid #cbd5dc;border-radius:5px}.portal-form h2,.portal-form button{grid-column:1/-1}.portal-form h2{font-size:1.1rem;margin:.5rem 0 0}.notice{padding:.7rem;border-radius:5px}.success{background:#dcfce7;color:#166534}.error{background:#fee2e2;color:#991b1b}@media(max-width:600px){.portal-form{grid-template-columns:1fr}}
+</style>
+{% endblock %}

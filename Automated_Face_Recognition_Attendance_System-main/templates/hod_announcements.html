@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>College announcements</h1><p>Posts published here are shared with HODs, faculty, and students.</p></div></header>
+    <section class="portal-panel">
+        <h2>Publish an announcement</h2>
+        {% if saved %}<p class="notice success" role="status">Announcement published.</p>{% endif %}
+        {% if error %}<p class="notice error" role="alert">Enter both a title and message.</p>{% endif %}
+        <form method="post" class="announcement-form">
+            <label>Title<input name="title" maxlength="150" required></label>
+            <label>Message<textarea name="body" rows="4" maxlength="5000" required></textarea></label>
+            <label>Show announcement to<select name="audience" required><option value="all">Everyone</option><option value="students">Students only</option><option value="faculty">Faculty only</option></select></label>
+            <button class="btn btn-primary" type="submit">Publish announcement</button>
+        </form>
+    </section>
+    <section class="portal-panel"><h2>All announcements</h2>
+        {% for post in announcements %}
+        <article class="feed-item"><h3>{{ post[0] }}</h3><p>{{ post[1] }}</p><time>{{ post[2] }}</time><span class="author">{{ {'all': 'Everyone', 'students': 'Students only', 'faculty': 'Faculty only'}.get(post[5], 'Everyone') }} · Posted by {{ post[4] or post[3] }}</span></article>
+        {% else %}<p class="muted">No announcements have been published.</p>{% endfor %}
+    </section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel{max-width:1100px;margin:0 auto 1rem}.portal-heading{border-bottom:1px solid #cbd8dc;padding-bottom:.8rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p,.muted{color:#62747b}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1rem}.portal-panel h2{margin:.2rem 0 .8rem;font-size:1.1rem}.announcement-form{display:grid;gap:.75rem}.announcement-form label{display:grid;gap:.35rem;font-weight:600}.announcement-form input,.announcement-form textarea{width:100%;padding:.65rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit}.announcement-form button{justify-self:start}.feed-item{padding:.8rem 0;border-top:1px solid #e3eaec}.feed-item h3{margin:.2rem 0 .4rem;font-size:1rem}.feed-item p{white-space:pre-wrap}.feed-item time,.author{display:inline-block;margin-right:.8rem;font-size:.82rem;color:#62747b}.notice{padding:.7rem;border-radius:5px}.success{background:#dcfce7;color:#166534}.error{background:#fee2e2;color:#991b1b}
+</style>
+{% endblock %}

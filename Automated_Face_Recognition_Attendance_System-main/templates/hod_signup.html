@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #0f172a;
+        }
+
+        .bg-slider {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('/static/bec_1.jpg') center/cover no-repeat;
+            transition: background-image 1.5s ease;
+            filter: brightness(0.3);
+        }
+
+        .page-header {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(241, 245, 249, 0.97));
+            border-bottom: 4px solid #1e3a8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.85rem 1.5rem;
+            flex-wrap: wrap;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-header img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .page-header-text h1 {
+            margin: 0;
+            font-size: clamp(1.1rem, 4vw, 1.6rem);
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .page-header-text p {
+            margin: 0.1rem 0 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 1.5px;
+        }
+
+        .system-badge {
+            background: #1e3a8a;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card-title {
+            text-align: center;
+            margin: 0 0 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .card-title span {
+            color: #1e3a8a;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: #1e40af;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background: white;
+        }
+
+        .auto-username {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #4f46e5;
+            padding: 0.55rem 1rem;
+            background: #eef2ff;
+            border-radius: 8px;
+            border: 2px solid #c7d2fe;
+            margin-top: 0.4rem;
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 0.75rem;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover {
+            color: #1e3a8a;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            border: 1px solid #fecaca;
+        }
+
+        .exists-warn {
+            display: none;
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 0.82rem;
+            margin-top: 0.3rem;
+        }
+
+        .pwd-help {
+            font-size: 0.78rem;
+            color: #6b7280;
+            margin-top: 0.3rem;
+        }
+
+        .page-footer {
+            position: relative;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.9);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 0.65rem 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .page-footer strong {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 500px) {
+            .form-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .page-header-text h1 {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Rotating Background -->
+    <div class="bg-slider" id="bgSlider"></div>
+
+    <!-- College Header -->
+    <header class="page-header">
+        <img src="/static/beclogo.png" alt="BEC Logo" onerror="this.style.display='none'">
+        <div class="page-header-text">
+            <h1><span>Attendance System</span></h1>
+            <p>AUTONOMOUS • NAAC A++ ACCREDITED • APSCHE AFFILIATED</p>
+        </div>
+        <span class="system-badge">📷 Automated Face Recognition Attendance System</span>
+    </header>
+
+    <!-- Main Form -->
+    <main class="main-content">
+        <div class="form-card">
+            <h2 class="card-title">🏫 Create <span>HOD Account</span></h2>
+
+            <div class="info-box">
+                ℹ️ Your <b>username</b> is automatically generated from your selected branch.<br>
+                Example: <b>CSE &rarr; cshod</b> &nbsp;|&nbsp; <b>IT &rarr; ithod</b> &nbsp;|&nbsp; <b>ECE &rarr;
+                    ecehod</b>
+            </div>
+
+            {% if error %}
+            <div class="error-box">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST" id="hodSignupForm" novalidate>
+
+                <!-- Branch Dropdown -->
+                <div class="form-group">
+                    <label class="form-label">🎓 Select Your Branch / Department</label>
+                    <select name="branch_code" id="branchSelect" class="form-control" required
+                        onchange="updateUsername()">
+                        <option value="">— Select Branch —</option>
+                        {% for code, prefix, name in branches %}
+                        <option value="{{ prefix }}">{{ code }} — {{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Auto-generated username preview -->
+                <div class="form-group">
+                    <label class="form-label">🔑 Your Username (auto-generated)</label>
+                    <div id="usernamePreview" class="auto-username" style="color:#94a3b8;">Select a branch above…</div>
+                    <div id="userExists" class="exists-warn">⚠️ This HOD account already exists — please log in instead.
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label">🔒 Password</label>
+                    <input type="password" name="password" id="password" class="form-control"
+                        placeholder="Enter a strong password" required>
+                    <div class="pwd-help">Required: 10+ characters, uppercase, lowercase, number &amp; special character
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">✅ Create HOD Account</button>
+                <a href="/login" class="btn-back">← Back to Login</a>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <strong>Automated Face Recognition Attendance System</strong> &nbsp;|&nbsp;
+        &copy; 2026 BEC — <strong>NETHRA • AKHIL • NAGA SAI • LAKSHMAN</strong>
+    </footer>
+
+    <script>
+        // ---- Rotating BEC Background ----
+        const BEC_PHOTOS = [
+            '/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'
+        ];
+        let bgIdx = 0, validPhotos = [];
+        Promise.all(BEC_PHOTOS.map(src => new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve(src);
+            img.onerror = () => resolve(null);
+            img.src = src;
+        }))).then(results => {
+            validPhotos = results.filter(Boolean);
+            const slider = document.getElementById('bgSlider');
+            if (!slider || validPhotos.length === 0) return;
+            slider.style.backgroundImage = `url('${validPhotos[0]}')`;
+            setInterval(() => {
+                bgIdx = (bgIdx + 1) % validPhotos.length;
+                slider.style.backgroundImage = `url('${validPhotos[bgIdx]}')`;
+            }, 8000);
+        });
+
+        // ---- Username Preview ----
+        const branchSel = document.getElementById('branchSelect');
+        const previewEl = document.getElementById('usernamePreview');
+        const userExistsEl = document.getElementById('userExists');
+        const form = document.getElementById('hodSignupForm');
+        const pwdInput = document.getElementById('password');
+
+        function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
+
+        function updateUsername() {
+            const prefix = branchSel.value;
+            if (!prefix) {
+                previewEl.textContent = 'Select a branch above…';
+                previewEl.style.color = '#94a3b8';
+                userExistsEl.style.display = 'none';
+                return;
+            }
+            const uid = prefix + 'hod';
+            previewEl.textContent = uid;
+            previewEl.style.color = '#4f46e5';
+            checkExists(uid);
+        }
+
+        const checkExists = debounce(async (uid) => {
+            try {
+                const res = await fetch(`/api/check-username?user_id=${encodeURIComponent(uid)}`);
+                const data = await res.json();
+                userExistsEl.style.display = data.exists ? 'block' : 'none';
+            } catch (e) { /* silent */ }
+        }, 300);
+
+        form.addEventListener('submit', e => {
+            const pwd = pwdInput.value;
+            const branch = branchSel.value;
+            const msgs = [];
+            if (!branch) msgs.push('Please select a branch.');
+            if (pwd.length < 10) msgs.push('Password must be at least 10 characters.');
+            if (!/[A-Z]/.test(pwd)) msgs.push('Add an uppercase letter.');
+            if (!/[a-z]/.test(pwd)) msgs.push('Add a lowercase letter.');
+            if (!/\d/.test(pwd)) msgs.push('Add a number (0–9).');
+            if (!/[^A-Za-z0-9]/.test(pwd)) msgs.push('Add a special character (!@#$...).');
+            if (userExistsEl.style.display === 'block') msgs.push('This HOD account already exists.');
+            if (msgs.length) { e.preventDefault(); alert(msgs.join('\n')); }
+        });
+    </script>
+</body>
+
+</html>

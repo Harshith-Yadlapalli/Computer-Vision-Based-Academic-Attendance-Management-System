@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .faculty-page {
+        min-height: calc(100vh - 56px);
+        padding: 1.5rem clamp(1rem, 3vw, 2.5rem);
+        background: #eef3f4;
+    }
+
+    .faculty-header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        max-width: 1100px;
+        margin: 0 auto 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #cedadd;
+    }
+
+    .faculty-header h1 {
+        margin: 0;
+        color: #142b35;
+        font-size: 1.65rem;
+    }
+
+    .faculty-header p {
+        margin: 0.35rem 0 0;
+        color: #52636b;
+    }
+
+    .faculty-panel {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #d8e2e6;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .faculty-controls {
+        display: flex;
+        align-items: end;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e1e8ea;
+    }
+
+    .faculty-controls .form-group {
+        margin: 0;
+        min-width: 150px;
+    }
+
+    .faculty-roster {
+        width: 100%;
+        margin: 1rem 0;
+        border-collapse: collapse;
+    }
+
+    .faculty-roster th,
+    .faculty-roster td {
+        padding: 0.65rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e5ebed;
+    }
+
+    .faculty-roster th {
+        color: #34474f;
+        background: #f4f7f8;
+    }
+
+    .faculty-roster select {
+        min-width: 120px;
+    }
+
+    .faculty-message {
+        margin: 0.75rem 0;
+        padding: 0.7rem;
+        border-radius: 6px;
+    }
+
+    .faculty-message.success {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .faculty-message.error {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    @media (max-width: 600px) {
+        .faculty-header {
+            align-items: start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<main class="faculty-page">
+    <header class="faculty-header">
+        <div>
+            <h1>Faculty Attendance</h1>
+            <p>{{ branch }} · Year {{ year }} · Section {{ section }}</p>
+        </div>
+    </header>
+
+    <section class="faculty-panel" aria-label="Class attendance entry">
+        {% if saved %}<div class="faculty-message success" role="status">Attendance saved and shared with the HOD and students.</div>{% endif %}
+        {% if error %}<div class="faculty-message error" role="alert">{{ error }}</div>{% endif %}
+
+        <form method="GET" class="faculty-controls">
+            <div class="form-group">
+                <label class="form-label" for="facultyClass">Class</label>
+                <select class="form-control" id="facultyClass" name="class_id" required>
+                    {% for class_option in class_options %}
+                    <option value="{{ class_option[0] }}" {% if selected_class_id == class_option[0] %}selected{% endif %}>{{ class_option[1] }} · Year {{ class_option[2] }} · Section {{ class_option[3] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="attendanceDate">Date</label>
+                <input class="form-control" id="attendanceDate" type="date" name="date" value="{{ selected_date }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="attendancePeriod">Period</label>
+                <select class="form-control" id="attendancePeriod" name="period" required>
+                    {% for number, timing in periods.items() %}
+                    <option value="{{ number }}" {% if selected_period == number %}selected{% endif %}>P{{ number }} · {{ '%02d'|format(timing[0]) }}:{{ '%02d'|format(timing[1]) }}–{{ '%02d'|format(timing[2]) }}:{{ '%02d'|format(timing[3]) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn" type="submit">Load Roster</button>
+        </form>
+
+        <form method="POST">
+            <input type="hidden" name="class_id" value="{{ selected_class_id }}">
+            <input type="hidden" name="date" value="{{ selected_date }}">
+            <input type="hidden" name="period" value="{{ selected_period }}">
+            <div style="overflow-x:auto;">
+                <table class="faculty-roster">
+                    <thead>
+                        <tr><th>Student</th><th>Name</th><th>Present</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.user_id }}</td>
+                            <td>{{ student.name or '—' }}</td>
+                            <td>
+                                <select class="form-control" name="attendance_{{ student.user_id }}" aria-label="Attendance for {{ student.user_id }}">
+                                    <option value="absent" {% if student.status != 'present' %}selected{% endif %}>Absent</option>
+                                    <option value="present" {% if student.status == 'present' %}selected{% endif %}>Present</option>
+                                    <option value="od">OD</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3">No students are assigned to this class yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if students %}<button class="btn btn-primary" type="submit">Save Attendance</button>{% endif %}
+        </form>
+    </section>
+    {% include "_leave_requests.html" %}
+</main>
+{% endblock %}

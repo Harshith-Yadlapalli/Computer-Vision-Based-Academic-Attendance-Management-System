@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="portal-page">
+    <header class="portal-heading"><div><h1>Class updates & assignments</h1><p>Announcements and work for your batch.</p></div></header>
+    {% if saved %}<p class="notice success">Assignment submitted.</p>{% endif %}
+    {% if error %}<p class="notice error">{% if error == 'file' %}Choose a file to submit.{% elif error == 'type' %}Allowed file types: PDF, Word, text, ZIP, and images.{% elif error == 'late' %}The assignment deadline has passed.{% else %}The upload was rejected. Check the file and try again.{% endif %}</p>{% endif %}
+    <section class="portal-panel"><h2>Announcements</h2>{% for post in announcements %}<article class="feed-item"><h3>{{ post[0] }}</h3><p>{{ post[1] }}</p><time>{{ post[2] }}</time></article>{% else %}<p class="muted">No announcements have been posted.</p>{% endfor %}</section>
+    <section class="portal-panel"><h2>Assignments</h2>{% for assignment in assignments %}<article class="feed-item"><h3>{{ assignment[1] }}</h3><p>{{ assignment[2] or 'No extra instructions.' }}</p><p class="muted">Due {{ assignment[3] }}</p>
+        {% if assignment[4] %}<p>Submitted {{ assignment[5] }} · <a href="/coursework-files/{{ assignment[6] }}">{{ assignment[4] }}</a></p>{% endif %}
+        <form method="post" enctype="multipart/form-data" action="/student/coursework/{{ assignment[0] }}/submit" class="upload-form"><label for="submission-{{ assignment[0] }}">{% if assignment[4] %}Replace submission{% else %}Upload your work{% endif %}</label><input id="submission-{{ assignment[0] }}" type="file" name="submission" accept=".pdf,.doc,.docx,.txt,.zip,.png,.jpg,.jpeg" required><button class="btn btn-primary" type="submit">Submit</button></form>
+    </article>{% else %}<p class="muted">No assignments have been posted.</p>{% endfor %}</section>
+</main>
+<style>
+.portal-page{min-height:calc(100vh - 60px);padding:1.5rem clamp(1rem,4vw,3rem);background:#edf3f4;color:#18313a}.portal-heading,.portal-panel,.notice{max-width:1100px;margin-left:auto;margin-right:auto}.portal-heading{border-bottom:1px solid #cbd8dc;padding-bottom:.8rem;margin-bottom:1rem}.portal-heading h1{margin:0;font-size:1.6rem}.portal-heading p,.muted{color:#62747b}.portal-panel{background:#fff;border:1px solid #d8e2e6;border-radius:8px;padding:1rem;margin-bottom:1rem}.portal-panel h2{font-size:1.1rem;margin:.2rem 0 .8rem}.feed-item{padding:.75rem 0;border-top:1px solid #e3eaec}.feed-item h3{margin:.2rem 0 .4rem;font-size:1rem}.feed-item p{white-space:pre-wrap}.feed-item time,.muted{font-size:.85rem;color:#62747b}.upload-form{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-top:.8rem}.upload-form label{font-weight:700}.upload-form input{max-width:100%}.notice{padding:.7rem;border-radius:5px}.success{background:#dcfce7;color:#166534}.error{background:#fee2e2;color:#991b1b}
+</style>
+{% endblock %}

@@ -1,0 +1,19 @@
+<section class="leave-panel" aria-labelledby="leaveRequestsTitle">
+    <div class="leave-heading"><div><h2 id="leaveRequestsTitle">Leave requests</h2><p>Submit a request and check its review status here.</p></div></div>
+    {% if leave_saved %}<p class="leave-notice success" role="status">Your leave request was sent to the HOD.</p>{% endif %}
+    {% if leave_error %}<p class="leave-notice error" role="alert">Enter valid dates and a reason. The end date cannot be before the start date.</p>{% endif %}
+    <form method="post" action="/leave-request" class="leave-form">
+        <label>From<input type="date" name="start_date" required></label>
+        <label>To<input type="date" name="end_date" required></label>
+        <label class="leave-reason">Reason<textarea name="reason" rows="2" maxlength="2000" required></textarea></label>
+        <button class="btn btn-primary" type="submit">Request leave</button>
+    </form>
+    <div class="leave-table-wrap"><table class="leave-table"><thead><tr><th>Dates</th><th>Reason</th><th>Status</th><th>HOD note</th></tr></thead><tbody>
+        {% for leave in leave_requests %}
+        <tr><td>{{ leave[1] }} – {{ leave[2] }}</td><td>{{ leave[3] }}</td><td><span class="leave-status {{ leave[4] }}">{{ leave[4]|capitalize }}</span></td><td>{{ leave[5] or '—' }}</td></tr>
+        {% else %}<tr><td colspan="4">No leave requests yet.</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
+<style>
+.leave-panel{margin:1rem auto;padding:1rem;background:#fff;color:#18313a;border:1px solid #d8e2e6;border-radius:8px}.leave-heading h2{margin:0;font-size:1.15rem}.leave-heading p{margin:.3rem 0 .9rem;color:#62747b}.leave-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;align-items:end;margin-bottom:1rem}.leave-form label{display:grid;gap:.3rem;font-weight:600}.leave-form input,.leave-form textarea{width:100%;min-width:0;padding:.6rem;border:1px solid #cbd5dc;border-radius:5px;font:inherit}.leave-reason{grid-column:span 2}.leave-form button{min-height:40px}.leave-table-wrap{overflow-x:auto}.leave-table{width:100%;border-collapse:collapse}.leave-table th,.leave-table td{padding:.6rem;text-align:left;border-bottom:1px solid #e3eaec;vertical-align:top}.leave-table th{background:#f3f6f7}.leave-status{font-weight:700}.leave-status.pending{color:#a16207}.leave-status.approved{color:#15803d}.leave-status.rejected{color:#b91c1c}.leave-notice{padding:.65rem;border-radius:5px}.leave-notice.success{background:#dcfce7;color:#166534}.leave-notice.error{background:#fee2e2;color:#991b1b}@media(max-width:700px){.leave-form{grid-template-columns:1fr 1fr}.leave-reason{grid-column:1/-1}}@media(max-width:450px){.leave-form{grid-template-columns:1fr}.leave-reason{grid-column:auto}}
+</style>

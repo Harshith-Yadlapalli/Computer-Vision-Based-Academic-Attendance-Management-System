@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Override base.html .main-content to remove side white borders */
+    .main-content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .student-bg-container {
+        background: linear-gradient(rgba(0, 0, 0, 0.50), rgba(0, 0, 0, 0.50)), url('/static/bec_1.jpg') center/cover fixed;
+        min-height: calc(100vh - 60px);
+        /* minus nav */
+        padding: 2rem;
+        color: white;
+        transition: background-image 0.5s ease;
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .main-content-inner {
+        width: 100%;
+        max-width: 1100px;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #1e293b;
+    }
+
+    .icon-strip {
+        display: flex;
+        gap: .75rem;
+        justify-content: center;
+        align-items: center;
+        margin: 1rem 0 0 0;
+        color: #e2e8f0;
+        font-size: 1.1rem;
+    }
+
+    .icon-chip {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 9999px;
+        padding: .35rem .7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+    /* ===== Compact Stats Bar ===== */
+    .stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding: 0.6rem 1rem;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(6px);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 16px rgba(31, 38, 135, 0.18);
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 1rem;
+    }
+
+    .stats-bar .stat-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    .stats-bar .stat-divider {
+        width: 1px;
+        height: 16px;
+        background: #cbd5e1;
+    }
+
+    .stats-bar .stat-val {
+        font-weight: 800;
+    }
+
+    .stats-bar .stat-val.green {
+        color: #16a34a;
+    }
+
+    .stats-bar .stat-val.amber {
+        color: #d97706;
+    }
+
+    .stats-bar .stat-val.red {
+        color: #dc2626;
+    }
+
+    .stats-bar .stat-val.blue {
+        color: #2563eb;
+    }
+
+    .attendance-pct {
+        margin-left: auto;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    .attendance-pct.pct-good {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .attendance-pct.pct-warn {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .attendance-pct.pct-bad {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* ===== Day-wise Attendance ===== */
+    .day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .day-row {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        transition: box-shadow 0.2s;
+    }
+
+    .day-row:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .day-header {
+        display: flex;
+        align-items: center;
+        padding: 0.65rem 1rem;
+        cursor: pointer;
+        user-select: none;
+        gap: 0.75rem;
+        transition: background 0.15s;
+    }
+
+    /* Period status badges from HOD */
+    .period-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 52px;
+        text-align: center;
+    }
+
+    .period-present {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+
+    .period-absent {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .day-header:hover {
+        background: #f8fafc;
+    }
+
+    .day-date {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1e293b;
+        min-width: 100px;
+    }
+
+    .day-date .day-name {
+        font-weight: 500;
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-left: 0.35rem;
+    }
+
+    .day-summary {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex: 1;
+    }
+
+    .day-summary .mini-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+
+    /* Specific Date Checker */
+    .date-checker-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .date-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        padding: 0.8rem 1.5rem;
+        border-radius: 9999px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .date-input-wrapper label {
+        font-weight: 800;
+        color: #1e293b;
+        font-size: 1.05rem;
+    }
+
+    .date-input-wrapper input[type="date"] {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        border: 1px solid #cbd5e1;
+        font-weight: 700;
+        color: #334155;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .date-input-wrapper input[type="date"]:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .date-result-card {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(12px);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .result-icon {
+        font-size: 3.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-status {
+        font-size: 1.8rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .result-pct {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #475569;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Quotes ticker */
+    .quotes-ticker {
+        position: static;
+        background: rgba(30, 58, 138, 0.9);
+        color: #fff;
+        padding: .4rem 0;
+        overflow: hidden;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        margin-top: 2rem;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .quotes-track {
+        display: inline-block;
+        white-space: nowrap;
+        animation: ticker 30s linear infinite;
+    }
+
+    .quote-pill {
+        display: inline-block;
+        margin: 0 .8rem;
+        padding: .25rem .6rem;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 9999px;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    @keyframes ticker {
+        0% {
+            transform: translateX(100%);
+        }
+
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    .today-badge {
+        font-size: 0.6rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        padding: 0.1rem 0.45rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .history-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .history-heading h2 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 1.15rem;
+    }
+
+    .history-controls {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .history-controls input,
+    .history-controls select {
+        min-height: 40px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 0.45rem 0.65rem;
+        color: #334155;
+        background: white;
+        font: inherit;
+    }
+
+    .history-day {
+        padding: 0.85rem 1rem;
+    }
+
+    .history-day-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.7rem;
+    }
+
+    .history-date {
+        color: #1e293b;
+        font-weight: 800;
+    }
+
+    .history-count {
+        color: #64748b;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .history-periods {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .history-empty {
+        padding: 1.5rem;
+        text-align: center;
+        color: #64748b;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+    }
+
+    .student-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.65rem;
+    }
+
+    .student-meta span {
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: rgba(15, 23, 42, 0.3);
+        border-radius: 5px;
+        padding: 0.2rem 0.5rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+        .student-bg-container {
+            padding: 1rem;
+        }
+
+        .dashboard-header > div {
+            min-width: 0 !important;
+            max-width: 100%;
+        }
+
+        .dashboard-header > div:last-child {
+            width: 100%;
+            flex-shrink: 1 !important;
+            align-items: flex-start !important;
+        }
+
+        .icon-strip {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .period-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .stats-bar {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="student-bg-container" id="studentBg">
+    <div class="main-content-inner">
+        <div class="dashboard-header" style="margin-bottom: 2rem; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1 1 50%; text-align: left; min-width: 300px;">
+                <h1 style="font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin: 0; line-height: 1.3;">
+                    🎓 {{ student_name or 'STUDENT PORTAL' }}</h1>
+                <p style="color: #cbd5e1; font-size: 1.1rem; margin: 0.4rem 0 0 0;">📋 Attendance overview • <strong style="color:white;">{{ student_id }}</strong></p>
+                <div class="student-meta" aria-label="Student academic details">
+                    {% if student_branch %}<span>{{ student_branch }}</span>{% endif %}
+                    {% if student_year %}<span>Year {{ student_year }}</span>{% endif %}
+                    {% if student_section %}<span>Section {{ student_section }}</span>{% endif %}
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0;">
+                <span class="status-badge {% if is_today_working %}status-success{% else %}status-warning{% endif %}">
+                    {% if is_today_working %}🟢 Working Day{% else %}🔴 No Attendance{% endif %}
+                </span>
+                <div class="icon-strip" style="margin: 0; padding: 0;">
+                    <span class="icon-chip">🤖 <span>AI Powered</span></span>
+                    <span class="icon-chip">👁️ <span>Face</span></span>
+                    <span class="icon-chip">✅ <span>Log</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compact Stats Bar -->
+        <div class="stats-bar">
+            <span class="stat-item">📊 Total: <span class="stat-val blue">{{ total_periods }}</span></span>
+            <span class="stat-divider"></span>
+            <span class="stat-item">✅ Present: <span class="stat-val green">{{ present_count }}</span></span>
+            <span class="stat-divider"></span>
+            <span class="stat-item">❌ Absent: <span class="stat-val red">{{ absent_count }}</span></span>
+            <span
+                class="attendance-pct {% if percent >= 75 %}pct-good{% elif percent >= 65 %}pct-warn{% else %}pct-bad{% endif %}">
+                📈 {{ percent }}%
+            </span>
+        </div>
+
+        <!-- Specific Date Checker -->
+        <div class="glass-card">
+            <div
+                style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; color: #1e293b;">
+                📅 Date-Specific Attendance Check
+            </div>
+
+            <div class="date-checker-container">
+                <div class="date-input-wrapper">
+                    <label for="studentDateFilter">Select Date:</label>
+                    <input type="date" id="studentDateFilter">
+                </div>
+
+                <div id="dateResultCard" class="date-result-card">
+                    <div class="result-icon">🔍</div>
+                    <div class="result-status" style="color: #64748b;">Select a Date</div>
+                    <div style="color: #94a3b8; font-weight: 600;">Use the calendar picker above to check your exact
+                        attendance status for any specific date.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content-inner">
+        <section class="glass-card" style="margin-top: 1rem;" aria-labelledby="historyTitle">
+            <div class="history-heading">
+                <h2 id="historyTitle">Attendance history</h2>
+                <div class="history-controls">
+                    <input type="search" id="historySearch" placeholder="Search date (YYYY-MM-DD)" aria-label="Search attendance by date">
+                    <select id="historyStatus" aria-label="Filter attendance by status">
+                        <option value="all">All days</option>
+                        <option value="present">All periods present</option>
+                        <option value="partial">Some periods present</option>
+                        <option value="absent">No periods present</option>
+                    </select>
+                </div>
+            </div>
+            <div class="day-list" id="attendanceHistory">
+                {% for date_key, periods in days_attendance.items() %}
+                    {% set day_present = periods|selectattr('status', 'equalto', 'present')|list|length %}
+                    {% if day_present == periods|length %}
+                        {% set day_status = 'present' %}
+                    {% elif day_present > 0 %}
+                        {% set day_status = 'partial' %}
+                    {% else %}
+                        {% set day_status = 'absent' %}
+                    {% endif %}
+                    <article class="day-row history-day" data-date="{{ date_key }}" data-status="{{ day_status }}">
+                        <div class="history-day-top">
+                            <span class="history-date">{{ date_key }}</span>
+                            <span class="history-count">{{ day_present }} / {{ periods|length }} periods present</span>
+                        </div>
+                        <div class="history-periods" aria-label="Period attendance for {{ date_key }}">
+                            {% for period in periods %}
+                                <span class="period-badge {% if period.status == 'present' %}period-present{% else %}period-absent{% endif %}"
+                                    title="{% if period.time_in != '--' %}Marked at {{ period.time_in }}{% else %}No attendance recorded{% endif %}">
+                                    P{{ period.period }} {% if period.status == 'present' %}Present{% else %}Absent{% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </article>
+                {% else %}
+                    <div class="history-empty">No attendance records are available yet.</div>
+                {% endfor %}
+            </div>
+            <div class="history-empty" id="historyNoMatches" hidden>No days match those filters.</div>
+        </section>
+    </div>
+
+    <div class="main-content-inner">
+        {% include "_leave_requests.html" %}
+    </div>
+
+    <!-- Motivational quotes ticker -->
+    <div class="quotes-ticker" aria-label="Motivational quotes">
+        <div class="quotes-track">
+            <span class="quote-pill">🎯 "Show up daily, succeed greatly"</span>
+            <span class="quote-pill">📖 "Be present, be engaged, and watch your knowledge grow"</span>
+            <span class="quote-pill">⏰ "Every class missed is a lesson lost"</span>
+            <span class="quote-pill">🏆 "Perfect attendance, perfect future"</span>
+            <span class="quote-pill">💡 "Your future begins with your presence"</span>
+            <span class="quote-pill">🚀 "Discipline today, success tomorrow"</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Specific Date Checker Logic
+    const daysData = {{ days_attendance | tojson | safe }};
+    const overallPct = {{ percent }};
+    const dateFilter = document.getElementById('studentDateFilter');
+    const resultCard = document.getElementById('dateResultCard');
+
+    if (dateFilter) {
+        function renderDateCard(selectedDate) {
+            if (!selectedDate) {
+                resultCard.innerHTML = `
+                    <div class="result-icon">🔍</div>
+                    <div class="result-status" style="color: #64748b;">Select a Date</div>
+                    <div style="color: #94a3b8; font-weight: 600;">Use the calendar picker above to check your exact attendance status for any specific date.</div>
+                `;
+                return;
+            }
+
+            // Calculate colors based on percentage
+            const pctColorClass = overallPct >= 75 ? '#166534' : (overallPct >= 65 ? '#b45309' : '#991b1b');
+            const pctBgClass = overallPct >= 75 ? '#dcfce7' : (overallPct >= 65 ? '#fef3c7' : '#fee2e2');
+            const pctBorderClass = overallPct >= 75 ? '#86efac' : (overallPct >= 65 ? '#fcd34d' : '#fca5a5');
+
+            let topHtml = `
+                <!-- OVERALL ATTENDANCE IS NOW THE PRIMARY FOCUS -->
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px dashed #cbd5e1;">
+                    <div style="font-size: 1.1rem; color: #475569; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase;">
+                        Overall Percentage Till Today
+                    </div>
+                    <div style="display: inline-block; background: ${pctBgClass}; padding: 0.8rem 2rem; border-radius: 12px; font-weight: 900; font-size: 2.5rem; color: ${pctColorClass}; border: 2px solid ${pctBorderClass}; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        ${overallPct}%
+                    </div>
+                </div>
+            `;
+
+            if (daysData[selectedDate]) {
+                const periods = daysData[selectedDate];
+                const total = periods.length;
+                const present = periods.filter(p => p.status === 'present').length;
+
+                const dayPct = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+                const isPresent = dayPct >= 50;
+
+                let periodHtml = '<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.5rem; justify-items:center; margin-top:1rem;">';
+                for (let p = 1; p <= 6; p++) {
+                    const pData = periods.find(x => x.period === p || x.period === p.toString());
+                    if (pData) {
+                        const pClass = pData.status === 'present' ? 'period-present' : 'period-absent';
+                        const pIcon = pData.status === 'present' ? '✅' : '❌';
+                        periodHtml += `<span class="period-badge ${pClass}" style="padding:0.4rem 0.6rem; font-size:0.85rem;" title="Time In: ${pData.time_in || '--'}">P${p} ${pIcon}</span>`;
+                    } else {
+                        periodHtml += `<span class="period-badge" style="background:#f1f5f9; color:#94a3b8; border:1px solid #cbd5e1; font-size:0.85rem; padding:0.4rem 0.6rem;" title="No record for P${p}">P${p} ➖</span>`;
+                    }
+                }
+                periodHtml += '</div>';
+
+                resultCard.innerHTML = topHtml + `
+                    <!-- DAY'S SPECIFIC ATTENDANCE MOVED TO THE BOTTOM -->
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.9;">
+                        <div style="font-size: 0.95rem; color: #64748b; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase;">
+                            Date: ${selectedDate}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                            <span style="font-size: 1.8rem;">${isPresent ? '✅' : '❌'}</span>
+                            <span style="font-size: 1.4rem; font-weight: 800; color: ${isPresent ? '#166534' : '#991b1b'};">${isPresent ? 'PRESENT' : 'ABSENT'}</span>
+                        </div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #475569;">
+                            Day's Percentage: <span style="color: ${isPresent ? '#166534' : '#991b1b'};">${dayPct}%</span>
+                        </div>
+                        ${periodHtml}
+                    </div>
+                `;
+            } else {
+                resultCard.innerHTML = topHtml + `
+                    <div style="opacity: 0.8;">
+                        <div style="font-size: 0.95rem; color: #64748b; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase;">
+                            Date: ${selectedDate}
+                        </div>
+                        <div class="result-icon">❓</div>
+                        <div class="result-status" style="color: #64748b;">NO RECORD</div>
+                        <div style="color: #94a3b8; font-weight: 600; font-size: 1.05rem;">We couldn't find any attendance data for this day.</div>
+                    </div>
+                `;
+            }
+        }
+
+        dateFilter.addEventListener('change', function () {
+            renderDateCard(this.value);
+        });
+
+        // Auto-load today's date
+        const todayStr = "{{ today_date }}";
+        if (todayStr) {
+            dateFilter.value = todayStr;
+            renderDateCard(todayStr);
+        }
+    }
+
+    const historySearch = document.getElementById('historySearch');
+    const historyStatus = document.getElementById('historyStatus');
+    const historyDays = Array.from(document.querySelectorAll('.history-day'));
+    const historyNoMatches = document.getElementById('historyNoMatches');
+
+    function filterAttendanceHistory() {
+        const query = historySearch.value.trim().toLowerCase();
+        const status = historyStatus.value;
+        let visibleCount = 0;
+
+        historyDays.forEach(day => {
+            const matchesDate = day.dataset.date.toLowerCase().includes(query);
+            const matchesStatus = status === 'all' || day.dataset.status === status;
+            day.hidden = !(matchesDate && matchesStatus);
+            if (!day.hidden) visibleCount++;
+        });
+
+        historyNoMatches.hidden = visibleCount > 0 || historyDays.length === 0;
+    }
+
+    historySearch.addEventListener('input', filterAttendanceHistory);
+    historyStatus.addEventListener('change', filterAttendanceHistory);
+
+    // Rotating BEC campus backgrounds with graceful fallback
+    const bg = document.getElementById('studentBg');
+    const BEC_STUDENT_PHOTOS = [
+        '/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'
+    ];
+    let bgIdx2 = 0, validStudBg = [];
+    Promise.all(BEC_STUDENT_PHOTOS.map(src => new Promise(res => {
+        const img = new Image();
+        img.onload = () => res(src);
+        img.onerror = () => res(null);
+        img.src = src;
+    }))).then(results => {
+        validStudBg = results.filter(Boolean);
+        if (!bg || !validStudBg.length) return;
+        bg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)), url('${validStudBg[0]}')`;
+        setInterval(() => {
+            bgIdx2 = (bgIdx2 + 1) % validStudBg.length;
+            bg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)), url('${validStudBg[bgIdx2]}')`;
+        }, 8000);
+    });
+</script>
+{% endblock %}

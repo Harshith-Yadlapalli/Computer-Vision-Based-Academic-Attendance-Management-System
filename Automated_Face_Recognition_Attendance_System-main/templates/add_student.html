@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student | HOD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #0f172a;
+        }
+
+        .bg-slider {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('/static/bec_1.jpg') center/cover no-repeat;
+            filter: brightness(0.22);
+            transition: background-image 1.5s ease;
+        }
+
+        .page-header {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(241, 245, 249, 0.97));
+            border-bottom: 4px solid #1e3a8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            flex-wrap: wrap;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-header img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .page-header-text h1 {
+            margin: 0;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .page-header-text p {
+            margin: 0.1rem 0 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 1.5px;
+        }
+
+        .main-content {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card-title {
+            text-align: center;
+            margin: 0 0 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+            background: white;
+        }
+
+        .field-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .info-box {
+            background: #f5f3ff;
+            border: 1px solid #ede9fe;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #5b21b6;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-create {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.6rem 1.25rem;
+            background: #f1f5f9;
+            color: #475569;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            border: 1px solid #fecaca;
+        }
+
+        .page-footer {
+            position: relative;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.9);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 0.65rem 1rem;
+        }
+
+        .page-footer strong {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 480px) {
+            .field-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-slider" id="bgSlider"></div>
+
+    <header class="page-header">
+        <img src="/static/beclogo.png" alt="BEC Logo" onerror="this.style.display='none'">
+        <div class="page-header-text">
+            <h1><span>Attendance System</span></h1>
+            <p>HOD PORTAL — STUDENT MANAGEMENT</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="form-card">
+            <h2 class="card-title">👤 Add Student Account</h2>
+
+            <div class="info-box">
+                ℹ️ Student's face images must already exist in the backend dataset folder
+                (<code>clean_faces/&lt;user_id&gt;/</code>) before adding them here.
+                The username format is <b>YYBRANCHxxx</b> — e.g. <code>21CSE001</code>.
+            </div>
+
+            {% if error %}
+            <div class="error-box">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="/hod/add-student">
+                <div class="form-group">
+                    <label class="form-label">🎓 Registration Number</label>
+                    <input type="text" name="user_id" class="form-control" placeholder="e.g. 21CSE001"
+                        pattern="^\d{2}[a-zA-Z]{3}\d{3}$"
+                        title="Format: 2 digits + 3 letters + 3 digits (e.g. 21CSE001)" required>
+                </div>
+
+                <div class="field-2col">
+                    <div class="form-group">
+                        <label class="form-label">📅 Date of Birth</label>
+                        <input type="date" name="dob" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🔒 Password</label>
+                        <input type="text" name="password" class="form-control" placeholder="Default: 123">
+                    </div>
+                </div>
+
+                <div class="field-2col">
+                    <div class="form-group">
+                        <label class="form-label">📚 Branch</label>
+                        <select name="branch" class="form-control" required>
+                            <option value="">Select Branch</option>
+                            <option value="CIVIL">CIVIL</option>
+                            <option value="CYBER">CYBER</option>
+                            <option value="CSE">CSE</option>
+                            <option value="CSM">CSM</option>
+                            <option value="DS">DS</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="EIE">EIE</option>
+                            <option value="IT">IT</option>
+                            <option value="MECH">MECH</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🎓 Year</label>
+                        <select name="year" class="form-control" required>
+                            <option value="">Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🪑 Section</label>
+                    <select name="section" class="form-control" required>
+                        <option value="">Select Section</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-create">✅ Create Student Account</button>
+                <a href="/hod" class="btn-back">← Back to Dashboard</a>
+            </form>
+        </div>
+    </main>
+
+    <footer class="page-footer">
+        <strong>Automated Face Recognition Attendance System</strong>
+        &nbsp;|&nbsp;
+        &copy; 2026 BEC — Developed by <strong>NETHRA • AKHIL • NAGA SAI • LAKSHMAN</strong>
+    </footer>
+
+    <script>
+        const BEC_PHOTOS = ['/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'];
+        let bgIdx = 0, validPhotos = [];
+        Promise.all(BEC_PHOTOS.map(src => new Promise(res => { const i = new Image(); i.onload = () => res(src); i.onerror = () => res(null); i.src = src; }))).then(r => {
+            validPhotos = r.filter(Boolean); const sl = document.getElementById('bgSlider');
+            if (!sl || !validPhotos.length) return;
+            sl.style.backgroundImage = `url('${validPhotos[0]}')`;
+            setInterval(() => { bgIdx = (bgIdx + 1) % validPhotos.length; sl.style.backgroundImage = `url('${validPhotos[bgIdx]}')`; }, 8000);
+        });
+    </script>
+</body>
+
+</html>

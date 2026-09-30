@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Sign Up | Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: Inter, system-ui, sans-serif;
+            background: #0f172a;
+        }
+
+        .bg-slider {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: url('/static/bec_1.jpg') center/cover no-repeat;
+            filter: brightness(0.3);
+        }
+
+        .page-header {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.85rem 1.5rem;
+            background: rgba(255, 255, 255, 0.97);
+            border-bottom: 4px solid #1e3a8a;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+
+        .page-header img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .page-header p {
+            margin: 0.15rem 0 0;
+            color: #475569;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .system-badge {
+            padding: 0.35rem 0.75rem;
+            color: #fff;
+            background: #1e3a8a;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .title-band {
+            position: relative;
+            z-index: 1;
+            padding: 0.65rem 1rem;
+            color: #fff;
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .main-content {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 560px;
+            padding: 1.75rem;
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .card-title {
+            margin: 0 0 1.25rem;
+            color: #1e293b;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .info-box {
+            margin-bottom: 1.1rem;
+            padding: 0.75rem 1rem;
+            color: #1e40af;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 0.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: #374151;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.8rem;
+            color: #0f172a;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
+            font: inherit;
+        }
+
+        .form-control:focus {
+            outline: 2px solid #93c5fd;
+            border-color: #3b82f6;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 0.3rem;
+            color: #64748b;
+            font-size: 0.76rem;
+        }
+
+        .error-box,
+        .success-box {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .error-box {
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .success-box {
+            color: #166534;
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.35rem;
+        }
+
+        .form-actions .btn-primary {
+            width: auto;
+            margin: 0;
+            padding: 0.7rem 1rem;
+            border: 0;
+            border-radius: 7px;
+            background: #1e3a8a;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .form-actions a {
+            color: #475569;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .page-footer {
+            position: relative;
+            z-index: 1;
+            padding: 0.7rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(15, 23, 42, 0.9);
+            text-align: center;
+            font-size: 0.72rem;
+        }
+
+        @media (max-width: 520px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 1.35rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-slider" aria-hidden="true"></div>
+    <header class="page-header">
+        <img src="{{ url_for('static', filename='beclogo.png') }}" alt="Attendance System logo">
+        <div>
+            <h1>Attendance System</h1>
+            <p>AUTONOMOUS • NAAC A++ ACCREDITED • APSCHE AFFILIATED</p>
+        </div>
+        <span class="system-badge">Automated Face Recognition Attendance System</span>
+    </header>
+    <div class="title-band">FACULTY REGISTRATION — Attendance System</div>
+
+    <main class="main-content">
+        <section class="form-card">
+            <h2 class="card-title">Create Faculty Account</h2>
+            <div class="info-box">Request access for one assigned class. An HOD must approve the request before attendance access is enabled.</div>
+
+            {% if error %}<div class="error-box" role="alert">{{ error }}</div>{% endif %}
+            {% if message %}<div class="success-box" role="status">{{ message }}</div>{% endif %}
+
+            <form method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="facultyId">Faculty ID</label>
+                        <input class="form-control" id="facultyId" name="user_id" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="facultyName">Name</label>
+                        <input class="form-control" id="facultyName" name="name" autocomplete="name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="facultyPassword">Password</label>
+                    <input class="form-control" id="facultyPassword" name="password" type="password" autocomplete="new-password" required>
+                    <small class="form-help">Password must be 10+ characters with uppercase, lowercase, number, and special character.</small>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="facultyBranch">Branch</label>
+                        <select class="form-control" id="facultyBranch" name="branch" required>
+                            <option value="">Select branch</option>
+                            {% for code, prefix, label in branches %}
+                            <option value="{{ code }}">{{ code }} — {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="facultyYear">Year</label>
+                        <select class="form-control" id="facultyYear" name="year" required>
+                            <option value="">Select year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="facultySection">Section</label>
+                    <select class="form-control" id="facultySection" name="section" required>
+                        <option value="">Select section</option>
+                        {% for section in ['A', 'B', 'C', 'D'] %}
+                        <option value="{{ section }}">{{ section }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" type="submit">Submit Signup Request</button>
+                    <a href="/login">Back to Sign In</a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="page-footer">Automated Face Recognition Attendance System</footer>
+</body>
+
+</html>

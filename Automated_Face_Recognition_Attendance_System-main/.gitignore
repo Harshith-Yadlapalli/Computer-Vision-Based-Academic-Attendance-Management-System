@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+
+# IDE settings
+.vscode/
+
+# Face data (large binary - re-generate locally)
+clean_faces/
+
+# Generated encodings (re-generate locally with encode_faces.py)
+encodings.pickle
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db

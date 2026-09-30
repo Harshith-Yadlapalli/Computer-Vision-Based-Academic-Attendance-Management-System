@@ -1,0 +1,1120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Override base.html .main-content to remove side white borders */
+    .main-content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .hod-bg-container {
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/static/bec_1.jpg') center/cover fixed;
+        min-height: calc(100vh - 60px);
+        padding: 2rem;
+        color: white;
+        transition: background-image 0.8s ease;
+        margin: 0;
+        width: 100%;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.94);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #1e293b;
+    }
+
+    .report-filters {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-btn {
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        background: #e2e8f0;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        font-size: 0.75rem;
+    }
+
+    .filter-btn:hover {
+        background: #cbd5e1;
+    }
+
+    .filter-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary-dark);
+    }
+
+    .generate-btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+
+    .gen-btn {
+        padding: 0.8rem 1rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .gen-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-detained {
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+    }
+
+    .btn-condonation {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .btn-eligible {
+        background: linear-gradient(135deg, #22c55e, #15803d);
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+    }
+
+    .result-list {
+        display: none;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Period status badges */
+    .period-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 52px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .period-badge:hover {
+        transform: scale(1.1);
+        opacity: 0.9;
+    }
+
+    .period-present {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .period-absent {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Legend strip */
+    .legend-strip {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+    }
+
+    .period-chip {
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .delete-btn {
+        border: none;
+        background: #fef2f2;
+        color: #dc2626;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        font-weight: 700;
+        transition: background 0.2s;
+    }
+
+    .delete-btn:hover {
+        background: #fecaca;
+    }
+
+    .dash-header-glass {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .styled-table tbody tr {
+        transition: background 0.2s;
+    }
+
+    .styled-table tbody tr:hover {
+        background: #f0f9ff !important;
+    }
+
+    /* ===== Day-Wise Accordion ===== */
+    .day-accordion {
+        margin-top: 0.5rem;
+    }
+
+    .day-header {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 0.35rem;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .day-header:hover {
+        background: #eef2ff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .day-date {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #1e293b;
+        min-width: 110px;
+    }
+
+    .day-summary {
+        display: flex;
+        gap: 0.75rem;
+        flex: 1;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .day-student-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    .tag-present {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .tag-absent {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .day-toggle {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-left: auto;
+        transition: transform 0.2s;
+    }
+
+    .day-header.expanded .day-toggle {
+        transform: rotate(180deg);
+    }
+
+    .day-detail {
+        display: none;
+        margin-bottom: 0.5rem;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .day-detail.visible {
+        display: block;
+    }
+
+    .dept-badge {
+        display: inline-block;
+        padding: 0.2rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: rgba(99, 102, 241, 0.15);
+        color: #6366f1;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        letter-spacing: 0.5px;
+    }
+
+    /* Column info tooltips */
+    .col-info {
+        font-size: 0.62rem;
+        color: #94a3b8;
+        font-weight: 500;
+        display: block;
+        margin-top: 1px;
+    }
+
+    @media (max-width: 600px) {
+        .day-summary {
+            gap: 0.3rem;
+        }
+
+        .day-student-tag {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.35rem;
+        }
+    }
+</style>
+
+<div class="hod-bg-container" id="hodBg">
+    <div class="dash-header-glass">
+        <div class="dashboard-header" style="margin-bottom: 0;">
+            <div>
+                <h1 style="font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🎓 HOD PORTAL</h1>
+                <p style="opacity: 0.9; font-size: 1.1rem;">📋 Higher Authority Portal
+                    <span class="dept-badge" style="margin-left:0.5rem;">🏫 Dept: {{ hod_dept }}</span>
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <span class="status-badge {% if is_today_working %}status-success{% else %}status-warning{% endif %}"
+                    style="margin-left:0.5rem;">
+                    {% if is_today_working %}🟢 Working Day{% else %}🔴 No Attendance (Holiday/Sunday){% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <section class="glass-panel" aria-labelledby="facultyRequestsTitle">
+        <h2 id="facultyRequestsTitle" style="margin-top:0;">Faculty Signup Requests</h2>
+        <p style="color:#64748b;">Approve a request to grant attendance access to the requested class.</p>
+        <div style="overflow-x:auto;">
+            <table class="styled-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Faculty</th>
+                        <th>Assigned class</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty_id, name, branch, year, section in pending_faculty %}
+                    <tr>
+                        <td>{{ name or faculty_id }}<br><small>{{ faculty_id }}</small></td>
+                        <td>{{ branch }} · Year {{ year }} · Section {{ section }}</td>
+                        <td style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                            <form method="POST" action="/hod/approve-faculty">
+                                <input type="hidden" name="user_id" value="{{ faculty_id }}">
+                                <button class="gen-btn btn-eligible" type="submit">Approve</button>
+                            </form>
+                            <form method="POST" action="/hod/reject-faculty">
+                                <input type="hidden" name="user_id" value="{{ faculty_id }}">
+                                <button class="delete-btn" type="submit">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No pending faculty requests.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-panel" aria-labelledby="approvedFacultyTitle">
+        <h2 id="approvedFacultyTitle" style="margin-top:0;">Approved Faculty</h2>
+        <div style="overflow-x:auto;">
+            <table class="styled-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Faculty</th>
+                        <th>Branch</th>
+                        <th>Year</th>
+                        <th>Section</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty_id, name, branch, year, section in approved_faculty %}
+                    <tr>
+                        <td>{{ name or faculty_id }}<br><small>{{ faculty_id }}</small></td>
+                        <td>{{ branch }}</td>
+                        <td>{{ year }}</td>
+                        <td>{{ section }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4">No approved faculty for this department yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-panel" aria-labelledby="rejectedFacultyTitle">
+        <h2 id="rejectedFacultyTitle" style="margin-top:0;">Rejected Faculty</h2>
+        <div style="overflow-x:auto;">
+            <table class="styled-table" style="width:100%;">
+                <thead><tr><th>Faculty</th><th>Branch</th><th>Year</th><th>Section</th></tr></thead>
+                <tbody>
+                    {% for faculty_id, name, branch, year, section in rejected_faculty %}
+                    <tr><td>{{ name or faculty_id }}<br><small>{{ faculty_id }}</small></td><td>{{ branch }}</td><td>{{ year }}</td><td>{{ section }}</td></tr>
+                    {% else %}<tr><td colspan="4">No rejected faculty requests.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-panel" aria-labelledby="leaveRequestsTitle">
+        <h2 id="leaveRequestsTitle" style="margin-top:0;">Student and Faculty Leave Requests</h2>
+        <div style="overflow-x:auto;">
+            <table class="styled-table" style="width:100%;">
+                <thead><tr><th>Requester</th><th>Dates</th><th>Reason</th><th>Status / decision</th><th>Review</th></tr></thead>
+                <tbody>
+                    {% for leave in leave_requests %}
+                    <tr>
+                        <td>{{ leave[1] }}<br><small>{{ leave[2]|capitalize }} · {{ leave[3] }}</small></td>
+                        <td>{{ leave[4] }} – {{ leave[5] }}</td>
+                        <td>{{ leave[6] }}</td>
+                        <td><strong>{{ leave[7]|capitalize }}</strong>{% if leave[8] %}<br><small>{{ leave[8] }}</small>{% endif %}</td>
+                        <td>
+                            {% if leave[7] == 'pending' %}
+                            <form method="post" action="/hod/leave-requests/{{ leave[0] }}/decision" style="display:flex;gap:.4rem;flex-wrap:wrap;">
+                                <input type="text" name="decision_note" maxlength="500" placeholder="Optional note" aria-label="Decision note">
+                                <button class="gen-btn btn-eligible" name="decision" value="approved" type="submit">Approve</button>
+                                <button class="delete-btn" name="decision" value="rejected" type="submit">Reject</button>
+                            </form>
+                            {% else %}<small>Reviewed {{ leave[9] }}</small>{% endif %}
+                        </td>
+                    </tr>
+                    {% else %}<tr><td colspan="5">No leave requests for this department.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-panel" aria-labelledby="attendanceReviewTitle">
+        <h2 id="attendanceReviewTitle">Attendance review</h2>
+        <p>Camera differences and repeated present submissions require human review; these signals do not prove proxy attendance.</p>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Student</th><th>Date / Period</th><th>Review signal</th><th>Details</th><th>Recorded</th></tr></thead>
+                <tbody>
+                    {% for flag in attendance_review_flags %}
+                    <tr>
+                        <td>{{ flag[1] or flag[0] }} <small>({{ flag[0] }})</small></td>
+                        <td>{{ flag[3] }} · P{{ flag[4] }}</td>
+                        <td>{% if flag[5] == 'duplicate_submission' %}Possible proxy · repeated present post{% else %}Faculty/CCTV mismatch{% endif %}</td>
+                        <td>{{ flag[6] }}</td>
+                        <td>{{ flag[7] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5">No attendance review flags.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-panel" aria-labelledby="cctvAuditTitle">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+            <h2 id="cctvAuditTitle" style="margin:0;">Daily CCTV attendance audit</h2>
+            <form method="get" action="/hod" style="display:flex;gap:.5rem;align-items:center;">
+                <label for="auditDate">Date</label>
+                <input id="auditDate" type="date" name="attendance_date" value="{{ audit_date }}" required>
+                <button class="gen-btn btn-eligible" type="submit">Review</button>
+            </form>
+        </div>
+        <p>Recognition log only; this system does not store or play CCTV video.</p>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Room / Class</th><th>Period / Subject</th><th>Faculty</th><th>Student</th><th>Portal</th><th>CCTV</th><th>Seen at</th></tr></thead>
+                <tbody>
+                    {% for row in cctv_audit_rows %}
+                    <tr>
+                        <td>{{ row.room }} · {{ row.branch }} Y{{ row.year }} {{ row.section }}</td>
+                        <td>P{{ row.period }} · {{ row.subject }}</td>
+                        <td>{{ row.faculty }}</td>
+                        <td>{{ row.student_name or row.student_id }} <small>({{ row.student_id }})</small></td>
+                        <td>{{ row.portal_status|capitalize }}</td>
+                        <td>{{ row.camera_status }}</td>
+                        <td>{{ row.camera_time or '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7">No class schedule for this date.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Main Reporting Section -->
+    <div class="glass-panel">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+            <h2 style="margin:0;">📊 Day-Wise Attendance Record</h2>
+            <div class="report-filters">
+                <a href="/hod?filter=7days" class="filter-btn {% if current_filter == '7days' %}active{% endif %}">📅
+                    Weekly</a>
+                <a href="/hod?filter=15days" class="filter-btn {% if current_filter == '15days' %}active{% endif %}">📅
+                    15 Days</a>
+                <a href="/hod?filter=30days" class="filter-btn {% if current_filter == '30days' %}active{% endif %}">📅
+                    Monthly</a>
+                <a href="/hod?filter=all" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">🗓️ All
+                    Time</a>
+                <input type="date" id="dateFilter" class="filter-btn" style="background:#fff;"
+                    title="Select specific date">
+                <select id="yearSelect" class="filter-btn" style="background:#fff;">
+                    <option value="">All Years</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+                <select id="branchSelect" class="filter-btn" style="background:#fff;">
+                    <option value="">All Branches</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="EE">EE</option>
+                    <option value="MECH">MECH</option>
+                    <option value="CIVIL">CIVIL</option>
+                    <option value="AIML">AIML</option>
+                </select>
+                <select id="sectionSelect" class="filter-btn" style="background:#fff;">
+                    <option value="">All Sections</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+                <input id="searchId" class="filter-btn" style="background:#fff; width:130px;"
+                    placeholder="🔍 Search ID">
+                <label class="filter-btn" style="background:#fff; display:flex; align-items:center; gap:4px;">
+                    <input type="checkbox" id="deriveToggle"> Include derived year
+                </label>
+            </div>
+        </div>
+
+        <!-- Legend with column explanations -->
+        <div class="legend-strip">
+            <span style="font-weight:700; color:#475569;">🏷️ Legend:</span>
+            <span class="legend-item"><span class="legend-dot"
+                    style="background:#dcfce7;border:1px solid #166534;"></span> Present (1.0)</span>
+            <span class="legend-item"><span class="legend-dot"
+                    style="background:#fee2e2;border:1px solid #991b1b;"></span> Absent (0.0)</span>
+            <span style="margin-left:auto; font-size:0.72rem; color:#64748b;">
+                📌 <b>Status</b> = current state &nbsp;|&nbsp;
+                ⭐ <b>Value</b> = attendance credit &nbsp;|&nbsp;
+                ⚡ <b>Action</b> = click to toggle
+            </span>
+        </div>
+
+        <!-- Day-Wise Accordion -->
+        <p style="font-size:0.8rem; color:#64748b; margin:0 0 0.5rem 0;">📅 Click a date to view/hide period-level
+            details</p>
+        <div class="day-accordion" style="max-height:500px; overflow-y:auto;">
+            {% for date_key, day_info in days_data.items() %}
+            <div class="day-header" onclick="toggleDayHod(this, 'hod-day-{{ loop.index }}')">
+                <span class="day-date">📅 {{ date_key }}</span>
+                <div class="day-summary">
+                    <span style="font-size:0.85rem; color:#64748b; font-weight:600;">{{ day_info.students|length }}
+                        Students Logged</span>
+                </div>
+                <span class="day-toggle">▼</span>
+            </div>
+            <div class="day-detail" id="hod-day-{{ loop.index }}">
+                <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                    <table class="styled-table" style="width:100%; margin:0;">
+                        <thead style="background:#f1f5f9;">
+                            <tr>
+                                <th>🎓 Student & Overall %</th>
+                                <th>🕐 Period-Wise Attendance (P1 to P6) <span class="col-info">Click any period to
+                                        toggle status</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sid, student_data in day_info.students.items() %}
+                            <tr>
+                                <td style="width: 25%;">
+                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">{{ sid }}</div>
+                                    <div style="margin-top:0.25rem;">
+                                        <span
+                                            class="status-badge pct-display pct-student-{{ sid }} {% if overall_percentages.get(sid, 0) >= 75 %}status-success{% elif overall_percentages.get(sid, 0) >= 65 %}status-warning{% else %}status-danger{% endif %}"
+                                            data-sid="{{ sid }}" style="font-size:0.75rem;">
+                                            Total: {{ overall_percentages.get(sid, 0) }}%
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                                        {% for p in range(1, 7) %}
+                                        {% set pData = student_data.periods.get(p|int) %}
+                                        {% if not pData %}
+                                        {% set pData = student_data.periods.get(p|string) %}
+                                        {% endif %}
+                                        {% if pData %}
+                                        <span
+                                            class="period-badge {% if pData.status == 'present' %}period-present{% else %}period-absent{% endif %}"
+                                            onclick="event.stopPropagation(); cycleStatus('{{ sid }}', '{{ date_key }}', {{ p }}, '{{ pData.status }}', this)"
+                                            title="Time In: {{ pData.time or '--' }} | Click to change"
+                                            style="cursor:pointer; font-size:0.85rem; padding:0.4rem 0.6rem;">
+                                            P{{ p }} {% if pData.status == 'present' %}✅{% else %}❌{% endif %}
+                                        </span>
+                                        {% else %}
+                                        <span class="period-badge"
+                                            style="background:#f1f5f9; color:#94a3b8; border:1px solid #cbd5e1; font-size:0.85rem; padding:0.4rem 0.6rem; cursor:not-allowed;"
+                                            title="No record for P{{ p }}">
+                                            P{{ p }} ➖
+                                        </span>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <p style="text-align:center; color:#94a3b8; padding:2rem;">No attendance records found for selected filters.
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="generate-btn-group">
+        <a href="/hod/manual-attendance" class="gen-btn" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+            ✍️ Manual Attendance
+        </a>
+        <a href="/hod/export-excel?filter={{ current_filter }}&year={{ current_year }}&branch={{ current_branch }}&section={{ current_section }}"
+            class="gen-btn btn-export">
+            📊 Export to Excel
+        </a>
+        <button class="gen-btn btn-eligible" onclick="showList('eligibleList')">
+            ✅ Eligibility List
+        </button>
+        <button class="gen-btn btn-condonation" onclick="showList('condonationList')">
+            ⚠️ Condonation List
+        </button>
+        <button class="gen-btn btn-detained" onclick="showList('detainedList')">
+            🚫 Detained List
+        </button>
+    </div>
+
+    <!-- Hidden Results Section -->
+    <div id="resultsContainer">
+        <!-- Eligible List -->
+        <div id="eligibleList" class="glass-panel result-list" style="border-left: 5px solid var(--success);">
+            <h2 style="color: var(--success);">✅ Eligibility List (>= 75%)</h2>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>🎓 Student ID</th>
+                        <th>📈 Percentage</th>
+                        <th>📌 Status</th>
+                        <th>⚡ Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s, p in eligible %}
+                    <tr>
+                        <td>{{ s }}</td>
+                        <td><b>{{ p }}%</b></td>
+                        <td><span class="status-badge status-success">Eligible</span></td>
+                        <td>
+                            <form method="POST" action="/hod/delete-student" style="display:inline;"
+                                onsubmit="return confirm('Delete {{ s }} and all records?')">
+                                <input type="hidden" name="student_id" value="{{ s }}">
+                                <button type="submit" class="delete-btn">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr>
+                        <td colspan="4">No students found in this category.</td>
+                    </tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Condonation List -->
+        <div id="condonationList" class="glass-panel result-list" style="border-left: 5px solid var(--warning);">
+            <h2 style="color: var(--warning);">⚠️ Condonation List (65% - 75%)</h2>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>🎓 Student ID</th>
+                        <th>📈 Percentage</th>
+                        <th>📌 Status</th>
+                        <th>⚡ Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s, p in condonation %}
+                    <tr>
+                        <td>{{ s }}</td>
+                        <td><b>{{ p }}%</b></td>
+                        <td><span class="status-badge status-warning">Condonation Required</span></td>
+                        <td>
+                            <form method="POST" action="/hod/delete-student" style="display:inline;"
+                                onsubmit="return confirm('Delete {{ s }} and all records?')">
+                                <input type="hidden" name="student_id" value="{{ s }}">
+                                <button type="submit" class="delete-btn">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}<tr>
+                        <td colspan="4">No students found in this category.</td>
+                    </tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detained List -->
+        <div id="detainedList" class="glass-panel result-list" style="border-left: 5px solid var(--danger);">
+            <h2 style="color: var(--danger);">🚫 Detained List (< 65%)</h2>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>🎓 Student ID</th>
+                                <th>📈 Percentage</th>
+                                <th>📌 Status</th>
+                                <th>⚡ Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s, p in detained %}
+                            <tr>
+                                <td>{{ s }}</td>
+                                <td><b>{{ p }}%</b></td>
+                                <td><span class="status-badge status-danger">Detained</span></td>
+                                <td>
+                                    <form method="POST" action="/hod/delete-student" style="display:inline;"
+                                        onsubmit="return confirm('Delete {{ s }} and all records?')">
+                                        <input type="hidden" name="student_id" value="{{ s }}">
+                                        <button type="submit" class="delete-btn">🗑 Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}<tr>
+                                <td colspan="4">No students found in this category.</td>
+                            </tr>{% endfor %}
+                        </tbody>
+                    </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---- Toggle Day Accordion (HOD) ----
+    function toggleDayHod(header, detailId) {
+        const detail = document.getElementById(detailId);
+        if (!detail) return;
+        const isVisible = detail.classList.contains('visible');
+        // Collapse all first
+        document.querySelectorAll('.day-detail').forEach(d => d.classList.remove('visible'));
+        document.querySelectorAll('.day-header').forEach(h => h.classList.remove('expanded'));
+        // Toggle the clicked one
+        if (!isVisible) {
+            detail.classList.add('visible');
+            header.classList.add('expanded');
+        }
+    }
+
+    let actionHistory = [];
+
+    // ---- Cycle Status (Present → Late → Absent → Present) ----
+    async function cycleStatus(studentId, date, period, currentStatus, btn, isUndo = false) {
+        const nextMap = { 'present': 'absent', 'absent': 'present' };
+        const newStatus = isUndo ? currentStatus : (nextMap[currentStatus] || 'present');
+        try {
+            const res = await fetch('/api/toggle-attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId, date: date, period: period, status: newStatus })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                const nextClass = { 'present': 'period-present', 'absent': 'period-absent' };
+                const nextIcon = { 'present': '✅', 'absent': '❌' };
+
+                if (!isUndo) {
+                    // Save to history before updating state
+                    actionHistory.push({
+                        studentId, date, period, previousStatus: currentStatus, btn
+                    });
+                }
+
+                btn.className = `period-badge ${nextClass[data.status]}`;
+                btn.innerHTML = `P${period} ${nextIcon[data.status]}`;
+                btn.setAttribute('onclick', `event.stopPropagation(); cycleStatus('${studentId}', '${date}', ${period}, '${data.status}', this)`);
+
+                // Update percentage silently
+                updatePercentagesSilent();
+            }
+        } catch (e) { alert('Error toggling attendance'); }
+    }
+
+    async function updatePercentagesSilent() {
+        const date = document.getElementById('dateFilter') ? document.getElementById('dateFilter').value : '';
+        const year = document.getElementById('yearSelect') ? document.getElementById('yearSelect').value : '';
+        const branch = document.getElementById('branchSelect') ? document.getElementById('branchSelect').value : '';
+        const section = document.getElementById('sectionSelect') ? document.getElementById('sectionSelect').value : '';
+        const q = document.getElementById('searchId') ? document.getElementById('searchId').value : '';
+        const derive = document.getElementById('deriveToggle') && document.getElementById('deriveToggle').checked ? '1' : '0';
+        const filter = "{{ current_filter }}";
+        const url = `/api/hod-data?filter=${encodeURIComponent(filter)}&date=${encodeURIComponent(date)}&year=${encodeURIComponent(year)}&branch=${encodeURIComponent(branch)}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(q)}&derive=${derive}`;
+
+        try {
+            const res = await fetch(url, { headers: { "Accept": "application/json" } });
+            const data = await res.json();
+            window.lastOverallPercentages = data.overall_percentages || {};
+            window.lastFilteredPercentages = data.filtered_percentages || {};
+
+            const useFiltered = filter && filter !== 'all';
+            const pctSource = useFiltered ? window.lastFilteredPercentages : window.lastOverallPercentages;
+            const pctLabel = useFiltered ? ({ '7days': 'Weekly', '15days': '15 Days', '30days': 'Monthly' }[filter] || 'Period') : 'Total';
+
+            document.querySelectorAll('.pct-display').forEach(el => {
+                const sid = el.getAttribute('data-sid');
+                if (sid && pctSource[sid] !== undefined) {
+                    const pct = pctSource[sid];
+                    el.innerText = `${pctLabel}: ${pct}%`;
+                    const badgeClass = pct >= 75 ? 'status-success' : (pct >= 65 ? 'status-warning' : 'status-danger');
+                    el.className = `status-badge pct-display pct-student-${sid} ${badgeClass}`;
+                }
+            });
+
+            // Re-render lists silently
+            if (data.eligible && document.getElementById('eligibleList')) renderList('eligibleList', data.eligible, 'Eligible', 'status-success');
+            if (data.condonation && document.getElementById('condonationList')) renderList('condonationList', data.condonation, 'Condonation Required', 'status-warning');
+            if (data.detained && document.getElementById('detainedList')) renderList('detainedList', data.detained, 'Detained', 'status-danger');
+        } catch (e) { console.error("Could not update percentages silently", e); }
+    }
+
+    // ---- Ctrl+Z Undo functionality ----
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.key === 'z') {
+            if (actionHistory.length > 0) {
+                const lastAction = actionHistory.pop();
+                cycleStatus(lastAction.studentId, lastAction.date, lastAction.period, lastAction.previousStatus, lastAction.btn, true);
+
+                // Show a small toast notification for undo
+                const undoToast = document.createElement('div');
+                undoToast.innerHTML = `↩️ Undid attendance toggle for ${lastAction.studentId} (P${lastAction.period})`;
+                undoToast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1e293b; color:white; padding:10px 20px; border-radius:8px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.2); animation:slideDown 0.3s forwards;";
+                document.body.appendChild(undoToast);
+                setTimeout(() => undoToast.remove(), 2500);
+            }
+        }
+    });
+
+    // ---- Show/Hide Lists ----
+    function showList(listId) {
+        document.querySelectorAll('.result-list').forEach(el => el.style.display = 'none');
+        const selected = document.getElementById(listId);
+        if (selected) { selected.style.display = 'block'; selected.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+
+    // ---- Live Filters ----
+    const dateFilter = document.getElementById('dateFilter');
+    const yearSelect = document.getElementById('yearSelect');
+    const branchSelect = document.getElementById('branchSelect');
+    const sectionSelect = document.getElementById('sectionSelect');
+    const searchId = document.getElementById('searchId');
+    const deriveToggle = document.getElementById('deriveToggle');
+    deriveToggle.checked = sessionStorage.getItem('deriveYear') === '1';
+
+    dateFilter.addEventListener('change', fetchFiltered);
+    yearSelect.addEventListener('change', fetchFiltered);
+    branchSelect.addEventListener('change', fetchFiltered);
+    sectionSelect.addEventListener('change', fetchFiltered);
+    searchId.addEventListener('input', debounce(fetchFiltered, 300));
+    deriveToggle.addEventListener('change', () => {
+        sessionStorage.setItem('deriveYear', deriveToggle.checked ? '1' : '0');
+        fetchFiltered();
+    });
+
+    async function fetchFiltered() {
+        const date = dateFilter.value;
+        const year = yearSelect.value;
+        const branch = branchSelect.value;
+        const section = sectionSelect.value;
+        const q = searchId.value;
+        const derive = deriveToggle.checked ? '1' : '0';
+        const filter = "{{ current_filter }}";
+        const url = `/api/hod-data?filter=${encodeURIComponent(filter)}&date=${encodeURIComponent(date)}&year=${encodeURIComponent(year)}&branch=${encodeURIComponent(branch)}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(q)}&derive=${derive}`;
+        const tableBody = document.querySelector('.day-accordion');
+        tableBody.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:2rem;">⏳ Loading…</p>`;
+        try {
+            const res = await fetch(url, { headers: { "Accept": "application/json" } });
+            const data = await res.json();
+            window.lastOverallPercentages = data.overall_percentages || {};
+            window.lastFilteredPercentages = data.filtered_percentages || {};
+            renderMaster(data.days_data, filter);
+            renderList('eligibleList', data.eligible, 'Eligible', 'status-success');
+            renderList('condonationList', data.condonation, 'Condonation Required', 'status-warning');
+            renderList('detainedList', data.detained, 'Detained', 'status-danger');
+        } catch (e) {
+            tableBody.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:2rem;">❌ Error loading data</p>`;
+        }
+    }
+    function debounce(fn, wait) {
+        let t; return function (...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+    }
+
+    function renderMaster(daysData, activeFilter) {
+        const container = document.querySelector('.day-accordion');
+        if (!daysData || Object.keys(daysData).length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:2rem;">No attendance records found for selected filters.</p>`;
+            return;
+        }
+
+        // When a period filter is active (weekly/15days/monthly), show the filtered % so HOD sees
+        // "what % did each student attend in the selected range", not their all-time %.
+        const useFiltered = activeFilter && activeFilter !== 'all';
+        const pctSource = useFiltered ? (window.lastFilteredPercentages || {}) : (window.lastOverallPercentages || {});
+        const pctLabel = useFiltered ? ({ '7days': 'Last 7 Days', '15days': 'Last 15 Days', '30days': 'Last 30 Days' }[activeFilter] || 'Period') : 'Overall';
+        let html = '';
+        let loopIndex = 1;
+
+        for (const [date_key, day_info] of Object.entries(daysData)) {
+            let summaryHtml = `<span style="font-size:0.85rem; color:#64748b; font-weight:600;">${Object.keys(day_info.students).length} Students Logged</span>`;
+
+            let rowsHtml = '';
+            for (const [sid, student_data] of Object.entries(day_info.students)) {
+                let periodBtns = '';
+                for (let p = 1; p <= 6; p++) {
+                    let pData = student_data.periods[p] || student_data.periods[p.toString()];
+                    if (pData) {
+                        periodBtns += `
+                        <span class="period-badge ${pData.status === 'present' ? 'period-present' : 'period-absent'}"
+                              onclick="event.stopPropagation(); cycleStatus('${sid}', '${date_key}', ${p}, '${pData.status}', this)"
+                              title="Time In: ${pData.time || '--'} | Click to change"
+                              style="cursor:pointer; font-size:0.85rem; padding:0.4rem 0.6rem;">
+                            P${p} ${pData.status === 'present' ? '✅' : '❌'}
+                        </span>`;
+                    } else {
+                        periodBtns += `
+                        <span class="period-badge" style="background:#f1f5f9; color:#94a3b8; border:1px solid #cbd5e1; font-size:0.85rem; padding:0.4rem 0.6rem; cursor:not-allowed;" title="No record for P${p}">
+                            P${p} ➖
+                        </span>`;
+                    }
+                }
+
+                let overallPct = pctSource[sid] || 0;
+                overallPct = typeof overallPct === 'number' ? overallPct : 0;
+                let badgeClass = overallPct >= 75 ? 'status-success' : (overallPct >= 65 ? 'status-warning' : 'status-danger');
+
+                rowsHtml += `
+                <tr>
+                    <td style="width: 25%;">
+                        <div style="font-size:1.05rem; font-weight:800; color:#1e293b; display:flex; justify-content:space-between; align-items:center;">
+                            <span>${sid}</span>
+                            <button onclick="viewStudentImages('${sid}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;" title="View Registration Images">📸 Images</button>
+                        </div>
+                        <div style="margin-top:0.25rem;">
+                            <span class="status-badge pct-display pct-student-${sid} ${badgeClass}" data-sid="${sid}" style="font-size:0.75rem;">
+                                ${pctLabel}: ${overallPct}%
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                            ${periodBtns}
+                        </div>
+                    </td>
+                </tr>`;
+            }
+
+            html += `
+            <div class="day-header" onclick="toggleDayHod(this, 'hod-day-${loopIndex}')">
+                <span class="day-date">📅 ${date_key}</span>
+                <div class="day-summary">${summaryHtml}</div>
+                <span class="day-toggle">▼</span>
+            </div>
+            <div class="day-detail" id="hod-day-${loopIndex}">
+                <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                    <table class="styled-table" style="width:100%; margin:0;">
+                        <thead style="background:#f1f5f9;">
+                            <tr>
+                                <th>🎓 Student & Overall %</th>
+                                <th>🕐 Period-Wise Attendance (P1 to P6) <span class="col-info">Click any period to toggle status</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+            </div>`;
+            loopIndex++;
+        }
+        container.innerHTML = html;
+    }
+
+    function renderList(containerId, list, labelText, badgeClass) {
+        const container = document.getElementById(containerId);
+        const tbody = container.querySelector('tbody');
+        if (!list || list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4">No students found in this category.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = list.map(({ id, percent }) => `
+            <tr>
+                <td>${id}</td>
+                <td><b>${percent.toFixed(2)}%</b></td>
+                <td><span class="status-badge ${badgeClass}">${labelText}</span></td>
+                <td>
+                    <button onclick="viewStudentImages('${id}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.85rem; cursor:pointer; margin-right:4px;" title="View Registration Images">📸 Images</button>
+                    <form method="POST" action="/hod/delete-student" style="display:inline;" onsubmit="return confirm('Delete ${id} and all records? This is permanent.')">
+                        <input type="hidden" name="student_id" value="${id}">
+                        <button type="submit" class="delete-btn">🗑 Delete</button>
+                    </form>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ---- Rotating BEC Background Images (with fallback) ----
+    const bgEl = document.getElementById('hodBg');
+    const BEC_BG_PHOTOS = [
+        '/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'
+    ];
+    let bgIdx = 0, validBgPhotos = [];
+    Promise.all(BEC_BG_PHOTOS.map(src => new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    }))).then(results => {
+        validBgPhotos = results.filter(Boolean);
+        if (!validBgPhotos.length) return;
+        bgEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('${validBgPhotos[0]}')`;
+        setInterval(() => {
+            bgIdx = (bgIdx + 1) % validBgPhotos.length;
+            bgEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('${validBgPhotos[bgIdx]}')`;
+        }, 8000);
+    });
+
+    // ---- Image Viewer ----
+    function viewStudentImages(studentId) {
+        document.getElementById('imageViewerStudentId').textContent = studentId;
+        const grid = document.getElementById('imageViewerGrid');
+        grid.innerHTML = '<div style="text-align:center; padding:2rem; color:#64748b;">Loading backend dataset...</div>';
+        document.getElementById('imageViewerModal').style.display = 'flex';
+
+        fetch('/api/student-images/' + studentId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    grid.innerHTML = `<div style="text-align:center; padding:2rem; color:#ef4444;">Error: ${data.error}</div>`;
+                    return;
+                }
+                if (!data.images || data.images.length === 0) {
+                    grid.innerHTML = `<div style="text-align:center; padding:2rem; color:#64748b;">No images found in the backend for this student.<br><br>They must have registered improperly or their dataset folder was removed.</div>`;
+                    return;
+                }
+                grid.innerHTML = data.images.map(imgSrc => `
+                    <div style="background:white; padding:0.5rem; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); text-align:center;">
+                        <img src="${imgSrc}" style="max-width:100%; border-radius:4px; height:auto; object-fit:cover; aspect-ratio:1;">
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                grid.innerHTML = `<div style="text-align:center; padding:2rem; color:#ef4444;">Failed to load images from server.</div>`;
+            });
+    }
+</script>
+
+<!-- Image Viewer Modal -->
+<div id="imageViewerModal"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.85); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div
+        style="background:white; border-radius:12px; width:90%; max-width:800px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; padding:1.5rem; border-bottom:1px solid #e2e8f0; background:#f8fafc;">
+            <h2 style="margin:0; font-size:1.5rem; color:#1e293b;">📸 Registration Images: <span
+                    id="imageViewerStudentId" style="color:#3b82f6;"></span></h2>
+            <button onclick="document.getElementById('imageViewerModal').style.display='none'"
+                style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#64748b; padding:0;">✖</button>
+        </div>
+        <div id="imageViewerGrid"
+            style="padding:1.5rem; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:1rem; align-items:start; background:#f1f5f9;">
+            <!-- Images will be injected here -->
+        </div>
+        <div style="padding:1rem 1.5rem; background:#f8fafc; border-top:1px solid #e2e8f0; text-align:right;">
+            <button onclick="document.getElementById('imageViewerModal').style.display='none'"
+                style="background:#e2e8f0; color:#475569; border:none; padding:0.5rem 1rem; border-radius:6px; font-weight:600; cursor:pointer;">Close
+                Viewer</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome | Automated Face Recognition Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=UnifrakturCook:wght@700&family=Source+Code+Pro:wght@700;800&display=swap"
+        rel="stylesheet">
+</head>
+<style>
+    html,
+    body {
+        height: auto;
+        min-height: 100%;
+        margin: 0;
+        overflow: auto;
+    }
+
+    .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e3a8a 70%, #312e81 100%);
+        font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Helvetica Neue', Arial, sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ===== Animated Background Overlay ===== */
+    .bg-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .bg-overlay .bg-image {
+        position: absolute;
+        inset: 0;
+        background: url("/static/bec_1.jpg") center/cover no-repeat;
+        opacity: 0.22;
+        transition: opacity 1.5s ease, background-image 1.5s ease;
+    }
+
+    /* bg-pulse removed — handled by JS slideshow */
+
+    /* Floating decorative shapes */
+    .floating-shape {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.06;
+        filter: blur(60px);
+        animation: float 18s ease-in-out infinite;
+    }
+
+    .shape-1 {
+        width: 400px;
+        height: 400px;
+        background: #6366f1;
+        top: -100px;
+        right: -100px;
+        animation-delay: 0s;
+    }
+
+    .shape-2 {
+        width: 300px;
+        height: 300px;
+        background: #22c55e;
+        bottom: -80px;
+        left: -80px;
+        animation-delay: -6s;
+    }
+
+    .shape-3 {
+        width: 250px;
+        height: 250px;
+        background: #f59e0b;
+        top: 40%;
+        left: 60%;
+        animation-delay: -12s;
+    }
+
+    .shape-4 {
+        width: 200px;
+        height: 200px;
+        background: #ec4899;
+        top: 20%;
+        left: 10%;
+        animation-delay: -8s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0) translateX(0);
+        }
+
+        25% {
+            transform: translateY(-30px) translateX(15px);
+        }
+
+        50% {
+            transform: translateY(15px) translateX(-20px);
+        }
+
+        75% {
+            transform: translateY(-20px) translateX(10px);
+        }
+    }
+
+    /* ===== Header ===== */
+    .header-brand {
+        background: rgba(255, 255, 255, 0.97);
+        border-bottom: 3px solid #1e3a8a;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .4rem;
+        text-align: center;
+    }
+
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .75rem;
+    }
+
+    .header-logo {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .header-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-name {
+        font-family: "Old English Text MT", "UnifrakturCook", serif;
+        font-size: clamp(2rem, 5vw, 3rem);
+        letter-spacing: .4px;
+        line-height: 1.1;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .header-autonomous {
+        margin-top: .2rem;
+        font-size: clamp(.8rem, 2vw, .95rem);
+        font-weight: 700;
+        color: #475569;
+        letter-spacing: 1.5px;
+    }
+
+    /* ===== Title Band ===== */
+    .title-band {
+        background: linear-gradient(135deg, #1e3a8a, #312e81);
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+    }
+
+    .title-band::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(90deg,
+                transparent,
+                transparent 50px,
+                rgba(255, 255, 255, 0.03) 50px,
+                rgba(255, 255, 255, 0.03) 100px);
+    }
+
+    .title-band h1 {
+        margin: .5rem 0 .8rem 0;
+        font-weight: 800;
+        font-size: clamp(1.1rem, 3vw, 1.6rem);
+        letter-spacing: 1px;
+        color: #FFFFFF;
+        position: relative;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .title-band .primary {
+        color: #FFFFFF;
+    }
+
+    .title-band .accent {
+        color: #93c5fd;
+    }
+
+    /* Decorative icons strip */
+    .deco-strip {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        padding: 0.3rem 0 0.6rem 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .deco-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.5px;
+    }
+
+    .deco-item span.deco-icon {
+        font-size: 1rem;
+    }
+
+    /* ===== Main Area ===== */
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 10;
+        padding: 1.5rem 1rem;
+    }
+
+    /* Welcome text */
+    .welcome-text {
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-text h2 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        margin: 0;
+    }
+
+    .welcome-text p {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 0.3rem;
+    }
+
+    /* ===== Role Cards ===== */
+    .role-cards {
+        display: flex;
+        gap: 1.25rem;
+        justify-content: center;
+    }
+
+    .role-card {
+        width: 190px;
+        height: 195px;
+        padding: 1rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        text-align: center;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .role-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        padding: 2px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.1));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    .role-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(99, 102, 241, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .role-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    .role-title {
+        font-weight: 800;
+        margin: 0.25rem 0;
+        font-size: 1.1rem;
+        letter-spacing: .3px;
+        color: white;
+    }
+
+    .role-card p {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.82rem;
+        margin: 0;
+    }
+
+    .card-hod:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(124, 58, 237, 0.2);
+    }
+
+    .card-student:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(249, 115, 22, 0.2);
+    }
+
+    .card-faculty:hover {
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), 0 0 40px rgba(20, 184, 166, 0.2);
+    }
+
+    /* ===== Action Buttons ===== */
+    .student-actions,
+    .hod-actions,
+    .faculty-actions {
+        display: none;
+        justify-content: center;
+        gap: 0.75rem;
+        margin: 0.25rem 0 0.75rem 0;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        padding: 0.6rem 1rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .student-actions .mini-btn,
+    .hod-actions .mini-btn,
+    .faculty-actions .mini-btn {
+        padding: 0.55rem 1.2rem;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: .3px;
+        font-size: 0.9rem;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .mini-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .mini-btn.signin {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+        border-color: #93c5fd;
+    }
+
+    .mini-btn.signup {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: #3730a3;
+        border-color: #a5b4fc;
+    }
+
+    /* ===== Login Form ===== */
+    .login-container {
+        max-width: 380px;
+        position: relative;
+        display: none;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 0 60px rgba(99, 102, 241, 0.08);
+    }
+
+    .login-container.visible {
+        display: block;
+    }
+
+    .login-container h2 {
+        margin: 0 0 1.5rem 0;
+        text-align: center;
+        color: #1e293b;
+    }
+
+    /* HOD Modal */
+    #hodModal>div {
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(16px);
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ===== Footer ===== */
+    .page-footer {
+        text-align: center;
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.35);
+        padding: 0.5rem 0 0.75rem 0;
+        letter-spacing: 0.3px;
+    }
+
+    /* ===== Feature badges at bottom ===== */
+    .feature-badges {
+        display: flex;
+        gap: 0.6rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .feat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.65rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.45);
+        transition: background 0.2s;
+    }
+
+    .feat-badge:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .feat-badge .fb-icon {
+        font-size: 0.85rem;
+    }
+
+    @media (max-width:480px) {
+        .role-cards {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .role-card {
+            width: 85%;
+            max-width: 220px;
+            height: auto;
+            padding: 1.25rem;
+        }
+
+        .header-name {
+            font-size: 1.6rem;
+        }
+
+        .deco-strip {
+            gap: 0.8rem;
+        }
+    }
+</style>
+
+<body>
+    <div class="page-wrapper">
+        <!-- Background overlay with image and shapes -->
+        <div class="bg-overlay">
+            <div class="bg-image"></div>
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
+            <div class="floating-shape shape-4"></div>
+        </div>
+
+        <header class="header-brand" role="banner" aria-label="Attendance System">
+            <div class="header-inner">
+                <div class="header-row">
+                    <img class="header-logo" src="{{ url_for('static', filename='bec_logo.png') }}"
+                        alt="Attendance System logo" width="70" height="70"
+                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='beclogo.png') }}';">
+                    <div class="header-text">
+                        <h1 class="header-name">Attendance System</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="title-band" role="region" aria-label="Project title">
+            <div class="header-inner" style="padding:0.4rem 1rem 0;">
+                <h1><span class="primary">AUTOMATED FACE RECOGNITION ATTENDANCE SYSTEM</span></h1>
+            </div>
+            <div class="deco-strip">
+                <span class="deco-item"><span class="deco-icon">📹</span> CCTV Monitoring</span>
+                <span class="deco-item"><span class="deco-icon">🧑‍🎓</span> Student Tracking</span>
+                <span class="deco-item"><span class="deco-icon">🏫</span> Classroom</span>
+                <span class="deco-item"><span class="deco-icon">🤖</span> AI Powered</span>
+            </div>
+        </section>
+
+        <div class="main-area">
+            <div class="welcome-text">
+                <h2>Welcome Back👋</h2>
+                <p>Select your role to get started</p>
+            </div>
+
+            <!-- Role Selection Cards -->
+            <div class="role-cards" id="roleCards">
+                <div class="role-card card-hod" onclick="showHodActions()">
+                    <div class="role-icon">🏛️</div>
+                    <div class="role-title">HOD</div>
+                    <p>Manage eligibility & reports</p>
+                </div>
+
+                <!-- Staff Module Removed -->
+
+                <div class="role-card card-student" onclick="showStudentActions()">
+                    <div class="role-icon">🎓</div>
+                    <div class="role-title">Student</div>
+                    <p>Sign up or Sign in</p>
+                </div>
+
+                <div class="role-card card-faculty" onclick="showFacultyActions()">
+                    <div class="role-icon">👩‍🏫</div>
+                    <div class="role-title">Faculty</div>
+                    <p>Mark class attendance</p>
+                </div>
+            </div>
+
+            <div class="hod-actions" id="hodActions">
+                <button class="mini-btn signin" onclick="selectRole('hod')">Sign In</button>
+                <button class="mini-btn signup" onclick="location.href='/hod/signup'">Sign Up</button>
+            </div>
+
+            <div class="student-actions" id="studentActions">
+                <button class="mini-btn signin" onclick="selectRole('student')">Sign In</button>
+                <button class="mini-btn signup" onclick="location.href='/student/signup'">Sign Up</button>
+            </div>
+
+            <div class="faculty-actions" id="facultyActions">
+                <button class="mini-btn signin" onclick="selectRole('faculty')">Sign In</button>
+                <button class="mini-btn signup" onclick="location.href='/faculty/signup'">Sign Up</button>
+            </div>
+
+            <!-- HOD modal overlay removed to match Student UI -->
+
+            <div class="login-container" id="loginFormContainer">
+                <h2 id="loginTitle" style="text-align: center; margin-bottom: 1.5rem; color: var(--text-main);">Login
+                </h2>
+
+                {% if error %}
+                <div
+                    style="background-color: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.25rem; font-size: 0.875rem;">
+                    {{ error }}
+                </div>
+                {% endif %}
+                {% if signup_role %}
+                <div role="status" style="background:#dcfce7;color:#166534;padding:.75rem;border-radius:.5rem;margin-bottom:1.25rem;font-size:.875rem;">
+                    {% if signup_role == 'faculty' %}Faculty signup submitted. Sign in after your HOD approves your request.
+                    {% elif signup_role == 'student' %}Student registration complete. Sign in with your student account.
+                    {% elif signup_role == 'hod' %}HOD account created. Sign in with your new account.{% endif %}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ '/student/login' if student_login else '/' }}">
+                    <input type="hidden" name="role" id="selectedRole">
+
+                    <div class="form-group">
+                        <label class="form-label">User ID</label>
+                        <input type="text" name="user_id" class="form-control" placeholder="Enter ID" required
+                            autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" name="password" id="passwordInput" class="form-control"
+                                placeholder="Enter Password" required style="padding-right: 40px;">
+                            <span id="togglePassword"
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.1rem; filter: grayscale(100%); opacity: 0.7;">
+                                👁️
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="forgotPasswordLink" style="display: none; text-align: right; margin-bottom: 0.5rem;">
+                        <a href="/forgot-password"
+                            style="color: var(--role-student); font-size: 0.85rem; font-weight: 600;">Forgot
+                            Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+                    {% if student_login %}
+                    <div style="text-align:center;margin-top:0.75rem;color:#475569;font-size:0.85rem;">
+                        New student? <a href="/student/signup" style="color:var(--role-student);font-weight:700;">Create an account</a>
+                    </div>
+                    {% endif %}
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="#" onclick="resetSelection()"
+                            style="color: #475569; font-size: 0.85rem; text-decoration: underline; font-weight: 600; cursor: pointer;">←
+                            Back
+                            to Role Selection</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Feature badges -->
+            <div class="feature-badges">
+                <span class="feat-badge"><span class="fb-icon">📷</span> Live CCTV</span>
+                <span class="feat-badge"><span class="fb-icon">🔐</span> Secure Login</span>
+                <span class="feat-badge"><span class="fb-icon">⏱️</span> Period-Wise</span>
+                <span class="feat-badge"><span class="fb-icon">🎯</span> Auto Detect</span>
+            </div>
+
+            <div class="page-footer">
+                Automated Face Recognition Attendance System<br>
+                &copy; 2026 BEC &nbsp;|&nbsp;<strong>NETHRA &bull; AKHIL &bull; NAGA SAI &bull;
+                    LAKSHMAN</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---- BEC Photo Rotating Background ----
+        const BEC_PHOTOS = [
+            '/static/bec_1.jpg', '/static/bec_2.jpg', '/static/bec_3.jpg', '/static/bec_4.jpg', '/static/bec_5.jpg', '/static/bec_6.jpg', '/static/bec_7.jpg', '/static/bec_8.jpg', '/static/bec_9.jpg', '/static/bec_10.jpg'
+        ];
+        const bgEl = document.querySelector('.bg-image');
+        let bgIdx = 0;
+        let validPhotos = [];
+
+        // Pre-check which images load successfully
+        Promise.all(BEC_PHOTOS.map(src => new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve(src);
+            img.onerror = () => resolve(null);
+            img.src = src;
+        }))).then(results => {
+            validPhotos = results.filter(Boolean);
+            if (validPhotos.length === 0) return; // keep gradient fallback
+            bgEl.style.backgroundImage = `url('${validPhotos[0]}')`;
+            setInterval(() => {
+                bgIdx = (bgIdx + 1) % validPhotos.length;
+                bgEl.style.backgroundImage = `url('${validPhotos[bgIdx]}')`;
+            }, 8000);
+        });
+
+        function showStudentActions() {
+            document.getElementById('studentActions').style.display = 'flex';
+            document.getElementById('hodActions').style.display = 'none';
+            document.getElementById('facultyActions').style.display = 'none';
+        }
+        function showHodActions() {
+            document.getElementById('hodActions').style.display = 'flex';
+            document.getElementById('studentActions').style.display = 'none';
+            document.getElementById('facultyActions').style.display = 'none';
+        }
+        function showFacultyActions() {
+            document.getElementById('facultyActions').style.display = 'flex';
+            document.getElementById('hodActions').style.display = 'none';
+            document.getElementById('studentActions').style.display = 'none';
+        }
+
+        function selectRole(role) {
+            document.getElementById('roleCards').style.display = 'none';
+            document.getElementById('studentActions').style.display = 'none';
+            document.getElementById('hodActions').style.display = 'none';
+            document.getElementById('facultyActions').style.display = 'none';
+            const formContainer = document.getElementById('loginFormContainer');
+            formContainer.classList.add('visible');
+
+            document.getElementById('selectedRole').value = role;
+
+            const titles = {
+                'hod': '🏛️ HOD Login',
+                'student': '🎓 Student Login',
+                'faculty': '👩‍🏫 Faculty Login'
+            };
+            document.getElementById('loginTitle').innerText = titles[role];
+
+            const btn = document.getElementById('loginBtn');
+            const forgotLink = document.getElementById('forgotPasswordLink');
+
+            if (role === 'hod') {
+                btn.style.backgroundColor = 'var(--role-hod)';
+                forgotLink.style.display = 'none';
+            }
+            if (role === 'student') {
+                btn.style.backgroundColor = 'var(--role-student)';
+                forgotLink.style.display = 'block';
+            }
+            if (role === 'faculty') {
+                btn.style.backgroundColor = '#0f766e';
+                forgotLink.style.display = 'none';
+            }
+        }
+
+        function resetSelection() {
+            document.getElementById('loginFormContainer').classList.remove('visible');
+            document.getElementById('roleCards').style.display = 'flex';
+            document.getElementById('studentActions').style.display = 'none';
+            document.getElementById('hodActions').style.display = 'none';
+            document.getElementById('facultyActions').style.display = 'none';
+        }
+
+        {% if student_login %}
+        selectRole('student');
+        {% endif %}
+
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function (e) {
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.style.opacity = '1';
+                this.style.filter = 'none';
+            } else {
+                passwordInput.type = 'password';
+                this.style.opacity = '0.7';
+                this.style.filter = 'grayscale(100%)';
+            }
+        });
+
+        // Retain Login state if there is an error
+        {% if error and request.form.get("role") %}
+        document.addEventListener('DOMContentLoaded', () => {
+            selectRole('{{ request.form.get("role") }}');
+            // Populate user_id back if available
+            {% if request.form.get("user_id") %}
+            document.querySelector('input[name="user_id"]').value = "{{ request.form.get('user_id') }}";
+            {% endif %}
+        });
+        {% endif %}
+    </script>
+</body>
+
+</html>

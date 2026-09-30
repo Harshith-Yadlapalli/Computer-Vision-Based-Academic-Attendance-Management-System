@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Attendance System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ===== Global Reset & Base ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* ===== Top Navigation Bar ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3730a3 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            min-height: 60px;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* BEC College mini-header inside nav */
+        .nav-college {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-college img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 2px;
+        }
+
+        .nav-college-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .nav-college-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: white;
+            letter-spacing: 0.2px;
+        }
+
+        .nav-college-sub {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Center — system title */
+        .nav-system-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Right nav items */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .live-clock {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.7rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .nav-right a {
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-right a:hover {
+            color: white;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.85);
+            color: white !important;
+            padding: 0.35rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            font-size: 0.82rem !important;
+            transition: background 0.2s !important;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444 !important;
+        }
+
+        /* ===== BEC College Header Band (shows on logged-in pages) ===== */
+        .bec-banner {
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+
+        .bec-banner img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            background: white;
+            border-radius: 50%;
+            padding: 3px;
+        }
+
+        .bec-banner-text h2 {
+            margin: 0;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .bec-banner-text p {
+            margin: 0.1rem 0 0;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+        }
+
+        /* ===== Footer ===== */
+        .site-footer {
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            font-size: 0.72rem;
+            padding: 0.75rem 1rem;
+            letter-spacing: 0.3px;
+            margin-top: auto;
+        }
+
+        .site-footer strong {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* ===== Full-page layout helper ===== */
+        body.page-with-footer {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        body.page-with-footer>.main-content {
+            flex: 1;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
+
+            .nav-system-title {
+                display: none;
+            }
+
+            .nav-college-name {
+                font-size: 0.82rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="page-with-footer">
+    {% if session.get('user_id') %}
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <!-- Left: College info -->
+        <a class="nav-college" href="{% if session.get('role') == 'hod' %}/hod{% elif session.get('role') == 'faculty' %}/faculty{% else %}/student{% endif %}">
+            <img src="{{ url_for('static', filename='beclogo.png') }}" alt="BEC Logo"
+                onerror="this.onerror=null; this.style.display='none';">
+            <div class="nav-college-text">
+                <span class="nav-college-name">Attendance System</span>
+                <span class="nav-college-sub">AUTONOMOUS • NAAC A++ • NBA</span>
+            </div>
+        </a>
+
+        <!-- Center: System name -->
+        <span class="nav-system-title">📷 Automated Face Recognition Attendance System</span>
+
+        <!-- Right: clock, profile, logout -->
+        <div class="nav-right">
+            <div class="live-clock" id="clock">Loading…</div>
+            <a href="/home">Home</a>
+            {% if session.get('role') == 'faculty' %}
+            <a href="/faculty/students">Students</a>
+            <a href="/faculty/schedule">Schedule</a>
+            <a href="/faculty/coursework">Class posts</a>
+            <a href="/faculty/profile">Profile</a>
+            {% elif session.get('role') == 'hod' %}
+            <a href="/hod/classes">Classes & schedule</a>
+            <a href="/hod/faculty-attendance">Faculty attendance</a>
+            <a href="/hod/announcements">Announcements</a>
+            {% elif session.get('role') == 'student' %}
+            <a href="/student/coursework">Class updates</a>
+            <a href="/student/schedule">Schedule</a>
+            <a href="/student/profile">👤 Profile</a>
+            {% endif %}
+            <a href="/logout" class="logout-btn">⇒ Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Universal Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <strong>Automated Face Recognition Attendance System</strong> |
+        &copy; 2026 BEC — <strong>NETHRA • AKHIL • NAGA SAI • LAKSHMAN</strong>
+    </footer>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-IN', { hour12: true });
+            const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+            const el = document.getElementById('clock');
+            if (el) el.textContent = `${dateStr} • ${timeStr}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+
+</html>
